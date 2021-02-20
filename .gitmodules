@@ -2,3 +2,6 @@
 	path = pullexploits
 	url = https://github.com/Cyb3rchad/pullexploits.git
 	branch = master
+[submodule "shellupgrade"]
+	path = shellupgrade
+	url = https://github.com/Cyb3rchad/shellupgrade.git
