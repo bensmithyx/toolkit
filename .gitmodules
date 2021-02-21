@@ -5,4 +5,4 @@
 [submodule "shellupgrade"]
 	path = shellupgrade
 	url = https://github.com/Cyb3rchad/shellupgrade.git
-	branch = main
+	branch = master
