@@ -1,3 +1,5 @@
+# This script will update toolkit with the most up to date repos and then save them to the toolkit repo.
+# Run this in the toolkit directory
 git submodule update --recursive --remote
 git add .
 git commit -m "updating submodule to latest"
