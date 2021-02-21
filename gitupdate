@@ -1,0 +1,4 @@
+git submodule update --recursive --remote
+git add .
+git commit -m "updating submodule to latest"
+git push
