@@ -19,18 +19,26 @@ class Colour:
     Colour3 = Red
     Colour4 = White
 
+# Scans host for open ports
 def scanner(ip):
-    ports, services = [], []
+    ports = []
     try:
+        file = open(".scan","w")
+        print("PORT    SERVICE")
+        file.write("PORT SERVICE")
         for port in range(1,10000):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex((ip, port))
             if result == 0:
                 ports.append(port)
-                print(f"Port {port}: 	 Open")
+                if not servicescan(port,"tcp"):
+                    if not servicescan(port,"udp"):
+                        print(f"\n{port}    Unknown")
+                        file.write(f"\n{port}    Unknown")
             sock.close()
-        return ports, services
-
+        file.close()
+        return ports
+    # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
         print("Exiting")
         sys.exit()
@@ -44,12 +52,20 @@ def scanner(ip):
         sys.exit()
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
-    os.system("rm .nmap .awkedfile 2>/dev/null")
+    os.system("rm .scan 2>/dev/null")
     display("Exited")
     sys.exit(0)
 
-# Catches ctrl+z signal
+# Catches ctrl+c signal
 signal.signal(signal.SIGINT, crash)
+
+# Finds service of ports
+def servicescan(port,protocal):
+    try:
+        print(f"\n{port}   {socket.getservbyport(port, protocol)}\n{'60'*'-'}")
+        file.write(f"\n{port}   {socket.getservbyport(port, protocol)}\n{'60'*'-'}")
+    except:
+        return False
 
 def readfile(filename):
     with open(filename, "r") as file:
@@ -102,13 +118,21 @@ def main(argv):
         if current_argument in ("-h", "--help"):
             print(f"\nDisplaying help:{help}")
         elif current_argument in ("-t", "--targethost"):
-            #pattern = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
-            #valid_ip = pattern.match(value)
-            ip = socket.gethostbyname(value)
+            try:
+                ip = socket.gethostbyname(value)
+            except:
+                display("Invalid host")
+                sys.exit(0)
             display(f"Scanning {value}")
-            ports, services = scanner(value)
+            t1 = datetime.now()
+            ports = scanner(value)
+            t2 = datetime.now()
+            print(f"\nScantime - {t2-t1}")
+            file = open(".scan","a")
+            file.write(f"\nScantime - {t2-t1}")
+            file.close()
             while True:
-                display("Options   [1] Dirb   [2] Save nmap   [3] Exit")
+                display("Options   [1] Dirb   [2] Save Scan   [3] Exit")
                 option = getinput("options",3)
                 if option == 1:
                     display("Which port would you like to dirb")
@@ -118,11 +142,11 @@ def main(argv):
                     choice = getinput("dirb", len(ports))
                     os.system(f"dirb http://{value}:{ports[choice]}")
                 elif option == 2:
-                    file = open("nmap","w")
-                    for line in readfile(".nmap"):
+                    file = open("scan","w")
+                    for line in readfile(".scan"):
                         file.write(line)
                     file.close()
-                    display("File save to nmap")
+                    display("File save to scan")
                 elif option == 3:
                     display("Exited")
                     break
@@ -132,3 +156,4 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
+   os.system("rm .scan 2>/dev/null")
