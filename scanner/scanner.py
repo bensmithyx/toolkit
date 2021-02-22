@@ -14,42 +14,13 @@ class Colour:
     Cyan = "\u001b[36m"
     Reset = "\u001b[0m"
     # Theme
-    Colour1 = Green
+    Colour1 = Blue
     Colour2 = Cyan
     Colour3 = Red
     Colour4 = White
+    text = Yellow
 
-# Scans host for open ports
-def scanner(ip):
-    ports = []
-    try:
-        file = open(".scan","w")
-        print("PORT    SERVICE")
-        file.write("PORT SERVICE")
-        for port in range(1,10000):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex((ip, port))
-            if result == 0:
-                ports.append(port)
-                if not servicescan(port,"tcp"):
-                    if not servicescan(port,"udp"):
-                        print(f"\n{port}    Unknown")
-                        file.write(f"\n{port}    Unknown")
-            sock.close()
-        file.close()
-        return ports
-    # If ctrl+c is pressed it will display "Exited"
-    except KeyboardInterrupt:
-        print("Exiting")
-        sys.exit()
 
-    except socket.gaierror:
-        print('Hostname could not be resolved. Exiting')
-        sys.exit()
-
-    except socket.error:
-        print("Couldn't connect to server")
-        sys.exit()
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
     os.system("rm .scan 2>/dev/null")
@@ -62,10 +33,46 @@ signal.signal(signal.SIGINT, crash)
 # Finds service of ports
 def servicescan(port,protocal):
     try:
-        print(f"\n{port}   {socket.getservbyport(port, protocol)}\n{'60'*'-'}")
-        file.write(f"\n{port}   {socket.getservbyport(port, protocol)}\n{'60'*'-'}")
+        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{socket.getservbyport(port, protocal)}{Colour.Reset}\n{30*'-'}")
+        file = open(".scan","a")
+        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{socket.getservbyport(port, protocal)}{Colour.Reset}\n{30*'-'}")
+        file.close()
+        return True
     except:
         return False
+
+# Scans host for open ports
+def scanner(ip):
+    ports = []
+    try:
+        file = open(".scan","w")
+        print(f"PORT    SERVICE\n")
+        file.write(f"PORT    SERVICE\n{30*'-'}")
+        file.close()
+        for port in range(1,10000):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((ip, port))
+            if result == 0:
+                ports.append(port)
+                if not servicescan(port,"tcp"):
+                    if not servicescan(port,"udp"):
+                        file = open(".scan","a")
+                        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
+                        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
+                        file.close()
+            sock.close()
+        file.close()
+        return ports
+    # If ctrl+c is pressed it will display "Exited"
+    except KeyboardInterrupt:
+        print("Exiting")
+        sys.exit()
+    except socket.gaierror:
+        print('Hostname could not be resolved.')
+        sys.exit()
+    except socket.error:
+        print("Couldn't connect to server")
+        sys.exit()
 
 def readfile(filename):
     with open(filename, "r") as file:
@@ -76,7 +83,7 @@ def readfile(filename):
 def getinput(option,range):
     while True:
         try:
-            choice = int(input(f"({Colour.Yellow}{option}{Colour.Reset}) > "))
+            choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
             if 0 < choice <= range:
                 return choice
         except Exception:
@@ -84,7 +91,7 @@ def getinput(option,range):
     return choice
 
 def display(text):
-    print(f"\n{Colour.Blue}[{Colour.Red}+{Colour.Blue}]{Colour.Yellow} {text}{Colour.Reset}\n")
+    print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.text} {text}{Colour.Reset}\n")
 
 def main(argv):
     verbose = False
@@ -102,8 +109,7 @@ def main(argv):
 {Colour.Colour2}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.Colour3}value{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}
 {Colour.Colour2}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
-{Colour.Colour2}--targethost{Colour.Reset}      {Colour.Magenta}-t{Colour.Reset}
-  {Colour.Colour3}n/a{Colour.Reset}
+{Colour.Colour2}--targethost{Colour.Reset}     {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
         print(f"An argument must be set{help}")
@@ -155,5 +161,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
-   os.system("rm .scan 2>/dev/null")
+    main(sys.argv[1:])
+    os.system("rm .scan 2>/dev/null")
