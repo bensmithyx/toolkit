@@ -84,7 +84,7 @@ def getinput(option,range):
     while True:
         try:
             choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
-            if 0 < choice <= range:
+            if 0 <= choice <= range:
                 return choice
         except Exception:
             display("Invalid Option")
@@ -143,7 +143,7 @@ def main(argv):
                 if option == 1:
                     display("Which port would you like to dirb")
                     for index, port in enumerate(ports):
-                        print(f"{index+1} - {port}")
+                        print(f"{index} - {port}")
                     print("\n")
                     choice = getinput("dirb", len(ports))
                     os.system(f"dirb http://{value}:{ports[choice]}")
