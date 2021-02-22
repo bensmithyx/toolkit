@@ -18,7 +18,7 @@ class Colour:
     Colour2 = Cyan
     Colour3 = Red
     Colour4 = White
-    text = Yellow
+    Text = Yellow
 
 
 # When ctrl+c is pressed listfile with be removed to clean up the directory
@@ -83,7 +83,7 @@ def readfile(filename):
 def getinput(option,range):
     while True:
         try:
-            choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
+            choice = int(input(f"({Colour.Text}{option}{Colour.Reset}) > "))
             if 0 <= choice <= range:
                 return choice
         except Exception:
@@ -91,12 +91,15 @@ def getinput(option,range):
     return choice
 
 def display(text):
-    print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.text} {text}{Colour.Reset}\n")
+    print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
 
 def requestweb(type, value, port, word):
-    if requests.get(f"{type}://{value}:{port}/{word.strip()}").status_code == 200:
-        print(f"{type}://{value}:{port}/{word.strip()} {Colour.Green}200{Colour.Reset}")
-
+    globaltype[0] = type
+    r = requests.get(f"{type}://{value}:{port}/{word.strip()}")
+    if r.status_code == 200:
+        code200.append(word.strip())
+    elif r.status_code == 403:
+        code403.append(word.strip())
 
 def main(argv):
     verbose = False
@@ -153,13 +156,21 @@ def main(argv):
                     choice = getinput("dirb", len(ports))
                     with open("../wordlists/common.txt") as wordlist:
                         words = wordlist.readlines()
+                    global code200, code403, globaltype
+                    code200, code403 = [],[]
+                    globaltype = ["none"]
                     if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
                         [requestweb("http", value, ports[choice], word) for word in words]
                     elif requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
                         [requestweb("https", value, ports[choice], word) for word in words]
                     else:
                         print("Port not scannable")
-                    #os.system(f"dirb http://{value}:{ports[choice]}")
+                    print(f"Code {Colour.Green}200{Colour.Reset}")
+                    for word in code200:
+                        print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                    print(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
+                    for word in code403:
+                        print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
                 elif option == 2:
                     file = open("scan","w")
                     for line in readfile(".scan"):
