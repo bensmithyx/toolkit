@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, subprocess, sys, re, getopt, signal, socket
+import os, subprocess, sys, re, getopt, signal, socket, requests, time
 from datetime import datetime
 
 # Adding in colourful text
@@ -93,6 +93,11 @@ def getinput(option,range):
 def display(text):
     print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.text} {text}{Colour.Reset}\n")
 
+def requestweb(type, value, port, word):
+    if requests.get(f"{type}://{value}:{port}/{word.strip()}").status_code == 200:
+        print(f"{type}://{value}:{port}/{word.strip()} {Colour.Green}200{Colour.Reset}")
+
+
 def main(argv):
     verbose = False
     short_options = "ht:"
@@ -146,7 +151,15 @@ def main(argv):
                         print(f"{index} - {port}")
                     print("\n")
                     choice = getinput("dirb", len(ports))
-                    os.system(f"dirb http://{value}:{ports[choice]}")
+                    with open("../wordlists/common.txt") as wordlist:
+                        words = wordlist.readlines()
+                    if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
+                        [requestweb("http", value, ports[choice], word) for word in words]
+                    elif requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
+                        [requestweb("https", value, ports[choice], word) for word in words]
+                    else:
+                        print("Port not scannable")
+                    #os.system(f"dirb http://{value}:{ports[choice]}")
                 elif option == 2:
                     file = open("scan","w")
                     for line in readfile(".scan"):
