@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import os, subprocess, sys, re, getopt, signal
+import os, subprocess, sys, re, getopt, signal, socket
+from datetime import datetime
 
 # Adding in colourful text
 class Colour:
@@ -18,6 +19,29 @@ class Colour:
     Colour3 = Red
     Colour4 = White
 
+def scanner(ip):
+    ports, services = [], []
+    try:
+        for port in range(1,10000):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((ip, port))
+            if result == 0:
+                ports.append(port)
+                print(f"Port {port}: 	 Open")
+            sock.close()
+        return ports, services
+
+    except KeyboardInterrupt:
+        print("Exiting")
+        sys.exit()
+
+    except socket.gaierror:
+        print('Hostname could not be resolved. Exiting')
+        sys.exit()
+
+    except socket.error:
+        print("Couldn't connect to server")
+        sys.exit()
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
     os.system("rm .nmap .awkedfile 2>/dev/null")
@@ -48,8 +72,8 @@ def display(text):
 
 def main(argv):
     verbose = False
-    short_options = "hi:"
-    long_options = ["help", "ipaddress="]
+    short_options = "ht:"
+    long_options = ["help", "targethost="]
     help = f"""\n{Colour.Colour4}
 
   _    _ ______ _      _____
@@ -62,7 +86,7 @@ def main(argv):
 {Colour.Colour2}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.Colour3}value{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}
 {Colour.Colour2}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
-{Colour.Colour2}--ipaddress{Colour.Reset}      {Colour.Magenta}-i{Colour.Reset}
+{Colour.Colour2}--targethost{Colour.Reset}      {Colour.Magenta}-t{Colour.Reset}
   {Colour.Colour3}n/a{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
@@ -77,40 +101,31 @@ def main(argv):
     for current_argument, value in arguments:
         if current_argument in ("-h", "--help"):
             print(f"\nDisplaying help:{help}")
-        elif current_argument in ("-i", "--ipaddress"):
-            pattern = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
-            valid_ip = pattern.match(value)
-            if valid_ip:
-                awk = "| awk '/open/{print $1 \" \" $3}'"
-                cmd = f"sudo nmap -sCV -Pn {value}"
-                os.system(f"{cmd} > .nmap")
-                display(f"Running command \"sudo nmap -sC -sV -Pn {value}\"")
-                [print(line.strip()) for line in readfile(".nmap")]
-                os.system(f"cat .nmap {awk} > .awkedfile")
-                ports = []
-                services = []
-                for line in readfile(".awkedfile"):
-                    ports.append(re.sub("\D", "", line.split()[0]))
-                    services.append(line.split()[1])
-                while True:
-                    display("Options   [1] Dirb   [2] Save nmap   [3] Exit")
-                    option = getinput("options",3)
-                    if option == 1:
-                        display("Which port would you like to dirb")
-                        for index, port in enumerate(ports):
-                            print(f"{index} - {port}")
-                        print("\n")
-                        choice = getinput("dirb", len(ports))
-                        os.system(f"dirb http://{value}:{ports[choice]}")
-                    elif option == 2:
-                        file = open("nmap","w")
-                        for line in readfile(".nmap"):
-                            file.write(line)
-                        file.close()
-                        display("File save to nmap")
-                    elif option == 3:
-                        display("Exited")
-                        break
+        elif current_argument in ("-t", "--targethost"):
+            #pattern = re.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+            #valid_ip = pattern.match(value)
+            ip = socket.gethostbyname(value)
+            display(f"Scanning {value}")
+            ports, services = scanner(value)
+            while True:
+                display("Options   [1] Dirb   [2] Save nmap   [3] Exit")
+                option = getinput("options",3)
+                if option == 1:
+                    display("Which port would you like to dirb")
+                    for index, port in enumerate(ports):
+                        print(f"{index+1} - {port}")
+                    print("\n")
+                    choice = getinput("dirb", len(ports))
+                    os.system(f"dirb http://{value}:{ports[choice]}")
+                elif option == 2:
+                    file = open("nmap","w")
+                    for line in readfile(".nmap"):
+                        file.write(line)
+                    file.close()
+                    display("File save to nmap")
+                elif option == 3:
+                    display("Exited")
+                    break
             else:
                 print(f"\nInvalid Parameters:{help}")
 
