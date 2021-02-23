@@ -120,7 +120,7 @@ def main(argv):
 {Colour.Colour2}--targethost{Colour.Reset}     {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
-        print(f"An argument must be set{help}")
+        display(f"An argument must be set{help}")
     try:
         arguments, values = getopt.getopt(argv, short_options, long_options)
     except getopt.error as error:
@@ -185,5 +185,12 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    print(f"""{Colour.Blue}
+   _____
+  / ____|
+ | (___    ___  __ _  _ __   _ __    ___  _ __
+  \___ \  / __|/ _` || '_ \ | '_ \  / _ \| '__|
+  ____) || (__| (_| || | | || | | ||  __/| |
+ |_____/  \___|\__,_||_| |_||_| |_| \___||_|\n{Colour.Red}\n{94*'-'}{Colour.Reset}""")
     main(sys.argv[1:])
     os.system("rm .scan 2>/dev/null")
