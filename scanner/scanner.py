@@ -147,33 +147,36 @@ def main(argv):
             file.close()
             while True:
                 display("Options   [1] Dirb   [2] Save Scan   [3] Exit")
-                option = getinput("options",3)
+                option = getinput("options",4)
                 if option == 1:
-                    display("Which port would you like to dirb")
+                    display("Which port would you like to dirb <exit - 4>")
                     for index, port in enumerate(ports):
                         print(f"{index} - {port}")
                     print("\n")
                     choice = getinput("dirb", len(ports))
-                    with open("wordlists/common.txt") as wordlist:
-                        words = wordlist.readlines()
-                    global code200, code403, globaltype
-                    code200, code403 = [],[]
-                    globaltype = ["none"]
-                    try:
-                        if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
-                            [requestweb("https", value, ports[choice], word) for word in words]
-                    except:
+                    if choice == 4:
+                        display("Exited")
+                    else:
+                        with open("wordlists/common.txt") as wordlist:
+                            words = wordlist.readlines()
+                        global code200, code403, globaltype
+                        code200, code403 = [],[]
+                        globaltype = ["none"]
                         try:
-                            if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
-                                [requestweb("http", value, ports[choice], word) for word in words]
+                            if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
+                                [requestweb("https", value, ports[choice], word) for word in words]
                         except:
-                            print("Port not scannable")
-                    print(f"Code {Colour.Green}200{Colour.Reset}")
-                    for word in code200:
-                        print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
-                    print(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
-                    for word in code403:
-                        print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                            try:
+                                if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
+                                    [requestweb("http", value, ports[choice], word) for word in words]
+                            except:
+                                print("Port not scannable")
+                        print(f"Code {Colour.Green}200{Colour.Reset}")
+                        for word in code200:
+                            print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                        print(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
+                        for word in code403:
+                            print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
                 elif option == 2:
                     file = open("scan","w")
                     for line in readfile(".scan"):
