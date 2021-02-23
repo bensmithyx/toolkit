@@ -145,8 +145,9 @@ def main(argv):
             file.write(f"\nScantime - {t2-t1}")
             file.close()
             tmp = "scan"
+            wordlist = "wordlists/common.txt"
             while True:
-                display("Options   [1] Dirb   [2] Save Scan   [3] Exit")
+                display("Options   [1] Dirb   [2] Save Scan   [3] Settings   [4] Exit")
                 option = getinput("options",4)
                 if option == 1:
                     display("Which port would you like to dirb <exit - 4>")
@@ -157,7 +158,7 @@ def main(argv):
                     if choice == 4:
                         display("Exited")
                     else:
-                        with open("wordlists/common.txt") as wordlist:
+                        with open(f"wordlists/{wordlist}") as wordlist:
                             words = wordlist.readlines()
                         global code200, code403, globaltype
                         code200, code403 = [],[]
@@ -196,6 +197,16 @@ def main(argv):
                     file.close()
                     display(f"File save to {filename}")
                 elif option == 3:
+                    display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})   [2] Exit{Colour.Reset}")
+                    choice = getinput("Settings", 2)
+                    if choice == 1:
+                        with open(".listofwordlists","r") as file:
+                            lines = file.readlines()
+                        for index, line in enumerate(lines):
+                            print(f"{index} - {line}")
+                        choice = getinput("wordlists", len(lines))
+                        wordlist = lines[choice].strip()
+                elif option == 4:
                     display("Exited")
                     break
             else:
