@@ -159,12 +159,15 @@ def main(argv):
                     global code200, code403, globaltype
                     code200, code403 = [],[]
                     globaltype = ["none"]
-                    if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
-                        [requestweb("http", value, ports[choice], word) for word in words]
-                    elif requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
-                        [requestweb("https", value, ports[choice], word) for word in words]
-                    else:
-                        print("Port not scannable")
+                    try:
+                        if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
+                            [requestweb("https", value, ports[choice], word) for word in words]
+                    except:
+                        try:
+                            if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
+                                [requestweb("http", value, ports[choice], word) for word in words]
+                        except:
+                            print("Port not scannable")
                     print(f"Code {Colour.Green}200{Colour.Reset}")
                     for word in code200:
                         print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
