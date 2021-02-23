@@ -181,7 +181,7 @@ def main(argv):
                     display("Exited")
                     break
             else:
-                print(f"\nInvalid Parameters:{help}")
+                display(f"\nInvalid Parameters:{help}")
 
 
 if __name__ == "__main__":
