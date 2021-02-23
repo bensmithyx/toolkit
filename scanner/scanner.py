@@ -45,15 +45,18 @@ def servicescan(port,protocal):
 def scanner(ip):
     ports = []
     try:
+        # Opening file to append scan
         file = open(".scan","w")
         print(f"PORT    SERVICE\n")
         file.write(f"PORT    SERVICE\n{30*'-'}")
         file.close()
+        # Scanning all ports
         for port in range(65535):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex((ip, port))
             if result == 0:
                 ports.append(port)
+                # if service is not found using tcp or udp it will be unknown
                 if not servicescan(port,"tcp"):
                     if not servicescan(port,"udp"):
                         file = open(".scan","a")
@@ -73,12 +76,13 @@ def scanner(ip):
         print("Couldn't connect to server")
         sys.exit()
 
+# Function to read files
 def readfile(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
     file.close()
     return lines
-
+# Function to get input with formated and coloured chacters
 def getinput(option,range):
     while True:
         try:
@@ -88,10 +92,10 @@ def getinput(option,range):
         except Exception:
             display("Invalid Option")
     return choice
-
+# Displays text in a nice colourful format
 def display(text):
     print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
-
+# Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
 def requestweb(type, value, port, word):
     globaltype[0] = type
     r = requests.get(f"{type}://{value}:{port}/{word.strip()}")
@@ -99,11 +103,13 @@ def requestweb(type, value, port, word):
         code200.append(word.strip())
     elif r.status_code == 403:
         code403.append(word.strip())
-
+# Start of the main body of code
 def main(argv):
     verbose = False
+    # Options for argument inputation
     short_options = "ht:"
     long_options = ["help", "targethost="]
+    # Help menu for users
     help = f"""\n{Colour.Colour4}
 
   _    _ ______ _      _____
@@ -132,10 +138,12 @@ def main(argv):
             print(f"\nDisplaying help:{help}")
         elif current_argument in ("-t", "--targethost"):
             try:
+                # Checking if host is valid
                 ip = socket.gethostbyname(value)
             except:
                 display("Invalid host")
                 sys.exit(0)
+            # Starting host scan
             display(f"Scanning {value}")
             t1 = datetime.now()
             ports = scanner(value)
@@ -147,6 +155,7 @@ def main(argv):
             tmp = "scan"
             wordlist = "common.txt"
             while True:
+                # Displaying options
                 display("Options   [1] Dirb   [2] Save Scan   [3] Settings   [4] Exit")
                 option = getinput("options",4)
                 if option == 1:
@@ -154,15 +163,17 @@ def main(argv):
                     for index, port in enumerate(ports):
                         print(f"{index} - {port}")
                     print("\n")
+                    # Asking which port the user wants to input by showing them the ports found
                     choice = getinput("dirb", len(ports)+1)
                     if choice == len(ports)+1:
                         display("Exited")
                     else:
-                        with open(f"wordlists/{wordlist}","r") as list:
-                            words = list.readlines()
+                        # Reading words from chosen wordlist
+                        words = readfile(f"wordlists/{wordlist}")
                         global code200, code403, globaltype
                         code200, code403 = [],[]
                         globaltype = ["none"]
+                        # Checking if host:port is valid and will then enumerate
                         try:
                             if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
                                 [requestweb("https", value, ports[choice], word) for word in words]
@@ -172,6 +183,7 @@ def main(argv):
                                     [requestweb("http", value, ports[choice], word) for word in words]
                             except:
                                 print("Port not scannable")
+                        # Outputing host scan to tmp file ".dirb" and cli
                         file = open(".dirb", "w")
                         print(f"Code {Colour.Green}200{Colour.Reset}")
                         file.write(f"Code {Colour.Green}200{Colour.Reset}")
@@ -186,6 +198,7 @@ def main(argv):
                         file.close()
                         tmp = "dirb"
                 elif option == 2:
+                    # If save it chosen it will save the desired output to a file
                     tmpfile = ".scan"
                     filename = "scan"
                     if tmp == "dirb":
@@ -200,9 +213,11 @@ def main(argv):
                     display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})   [2] Exit{Colour.Reset}")
                     choice = getinput("Settings", 2)
                     if choice == 1:
+                        # Fidning all txt files in wordlist so directories are ignored
                         directory = os.listdir("wordlists")
                         for index, list in enumerate(directory):
-                            print(f"{index} - {list}")
+                            if list[-4:] == ".txt":
+                                print(f"{index} - {list}")
                         choice = getinput("wordlists", len(directory))
                         wordlist = directory[choice]
                         display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
@@ -216,6 +231,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    # Title for program starts
     print(f"""{Colour.Blue}
    _____
   / ____|
@@ -224,4 +240,5 @@ if __name__ == "__main__":
   ____) || (__| (_| || | | || | | ||  __/| |
  |_____/  \___|\__,_||_| |_||_| |_| \___||_|\n{Colour.Red}\n{94*'-'}{Colour.Reset}""")
     main(sys.argv[1:])
+    # Deletes tm files when prgram is exited
     os.system("rm .scan .dirb 2>/dev/null")
