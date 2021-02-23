@@ -211,4 +211,4 @@ if __name__ == "__main__":
   ____) || (__| (_| || | | || | | ||  __/| |
  |_____/  \___|\__,_||_| |_||_| |_| \___||_|\n{Colour.Red}\n{94*'-'}{Colour.Reset}""")
     main(sys.argv[1:])
-    os.system("rm .scan 2>/dev/null")
+    os.system("rm .scan .dirb 2>/dev/null")
