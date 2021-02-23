@@ -61,7 +61,6 @@ def scanner(ip):
                         file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
                         file.close()
             sock.close()
-        file.close()
         return ports
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
@@ -145,6 +144,7 @@ def main(argv):
             file = open(".scan","a")
             file.write(f"\nScantime - {t2-t1}")
             file.close()
+            tmp = "scan"
             while True:
                 display("Options   [1] Dirb   [2] Save Scan   [3] Exit")
                 option = getinput("options",4)
@@ -171,18 +171,30 @@ def main(argv):
                                     [requestweb("http", value, ports[choice], word) for word in words]
                             except:
                                 print("Port not scannable")
+                        file = open(".dirb", "w")
                         print(f"Code {Colour.Green}200{Colour.Reset}")
+                        file.write(f"Code {Colour.Green}200{Colour.Reset}")
                         for word in code200:
                             print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                            file.write(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
                         print(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
+                        file.write(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
                         for word in code403:
                             print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                            file.write(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
+                        file.close()
+                        tmp = "dirb"
                 elif option == 2:
-                    file = open("scan","w")
-                    for line in readfile(".scan"):
+                    tmpfile = ".scan"
+                    filename = "scan"
+                    if tmp == "dirb":
+                        tmpfile = ".dirb"
+                        filename = "dirb"
+                    file = open(filename,"w")
+                    for line in readfile(tmpfile):
                         file.write(line)
                     file.close()
-                    display("File save to scan")
+                    display(f"File save to {filename}")
                 elif option == 3:
                     display("Exited")
                     break
