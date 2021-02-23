@@ -200,12 +200,11 @@ def main(argv):
                     display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})   [2] Exit{Colour.Reset}")
                     choice = getinput("Settings", 2)
                     if choice == 1:
-                        with open(".listofwordlists","r") as file:
-                            lines = file.readlines()
-                        for index, line in enumerate(lines):
-                            print(f"{index} - {line}")
-                        choice = getinput("wordlists", len(lines))
-                        wordlist = lines[choice].strip()
+                        directory = os.listdir("wordlists")
+                        for index, list in enumerate(directory):
+                            print(f"{index} - {list}")
+                        choice = getinput("wordlists", len(directory))
+                        wordlist = directory[choice]
                 elif option == 4:
                     display("Exited")
                     break
