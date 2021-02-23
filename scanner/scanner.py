@@ -205,7 +205,6 @@ def main(argv):
                             print(f"{index} - {list}")
                         choice = getinput("wordlists", len(directory))
                         wordlist = directory[choice]
-                        print(wordlist)
                         display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
                     elif choice == 2:
                         display("Exited")
