@@ -154,7 +154,7 @@ def main(argv):
                         print(f"{index} - {port}")
                     print("\n")
                     choice = getinput("dirb", len(ports))
-                    with open("../wordlists/common.txt") as wordlist:
+                    with open("wordlists/common.txt") as wordlist:
                         words = wordlist.readlines()
                     global code200, code403, globaltype
                     code200, code403 = [],[]
