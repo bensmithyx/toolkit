@@ -23,7 +23,7 @@ class Colour:
 
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
-    os.system("rm .scan 2>/dev/null")
+    os.system("rm .scan .dirb 2>/dev/null")
     display("Exited")
     sys.exit(0)
 
@@ -150,12 +150,12 @@ def main(argv):
                 display("Options   [1] Dirb   [2] Save Scan   [3] Settings   [4] Exit")
                 option = getinput("options",4)
                 if option == 1:
-                    display("Which port would you like to dirb <exit - 4>")
+                    display(f"Which port would you like to dirb <exit - {len(ports)+1}>")
                     for index, port in enumerate(ports):
                         print(f"{index} - {port}")
                     print("\n")
-                    choice = getinput("dirb", len(ports))
-                    if choice == 4:
+                    choice = getinput("dirb", len(ports)+1)
+                    if choice == len(ports)+1:
                         display("Exited")
                     else:
                         with open(f"wordlists/{wordlist}") as wordlist:
@@ -205,6 +205,8 @@ def main(argv):
                             print(f"{index} - {list}")
                         choice = getinput("wordlists", len(directory))
                         wordlist = directory[choice]
+                    elif choice == 2:
+                        display("Exited")
                 elif option == 4:
                     display("Exited")
                     break
