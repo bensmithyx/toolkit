@@ -97,6 +97,7 @@ def display(text):
     print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
 # Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
 def requestweb(type, value, port, words, start):
+    recursivecheck = False
     globaltype[0] = type
     spaces = 0
     for word in words:
@@ -107,21 +108,24 @@ def requestweb(type, value, port, words, start):
         spaces = len(word)
         print(f"{type}://{value}:{port}/{formattedword}", end="\r")
         r = requests.get(f"{type}://{value}:{port}/{word}")
-        file = open(".dirb","a")
-        if r.status_code == 200:
-            print(f"{type}://{value}:{port}/{word}"+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
-            file.write(f"\n{type}://{value}:{port}/{word} {Colour.Green}200{Colour.Reset}")
+        if r.status_code in [200,403]:
             try:
                 recursive = requests.get(f"{type}://{value}:{port}/{word}/")
                 if recursive.status_code in [200,403]:
-                    requestweb(type, value, port, words, word)
+                    recursivecheck = True
             except:
-                pass
-
-        elif r.status_code == 403:
-            print(f"{type}://{value}:{port}/{word}     {Colour.Red}403{Colour.Reset}")
-            file.write(f"\n{type}://{value}:{port}/{word} {Colour.Red}403{Colour.Reset}")
-        file.close()
+                print("here")
+            file = open(".dirb","a")
+            if r.status_code == 200:
+                #+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
+                print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\u001b[34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
+                file.write("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\u001b[34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
+            elif r.status_code == 403:
+                print("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\u001b[34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
+                file.write("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\u001b[34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
+            file.close()
+            if recursivecheck:
+                requestweb(type, value, port, words, word)
 # Start of the main body of code
 def main(argv):
     verbose = False
