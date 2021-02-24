@@ -96,11 +96,13 @@ def getinput(option,range):
 def display(text):
     print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
 # Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
-def requestweb(type, value, port, words):
+def requestweb(type, value, port, words, start):
     globaltype[0] = type
     spaces = 0
     for word in words:
         word = word.strip()
+        if start != "None":
+            word = f"{start}/{word}"
         formattedword = word+(" "*spaces)
         spaces = len(word)
         print(f"{type}://{value}:{port}/{formattedword}", end="\r")
@@ -109,6 +111,13 @@ def requestweb(type, value, port, words):
         if r.status_code == 200:
             print(f"{type}://{value}:{port}/{word}"+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
             file.write(f"\n{type}://{value}:{port}/{word} {Colour.Green}200{Colour.Reset}")
+            try:
+                recursive = requests.get(f"{type}://{value}:{port}/{word}/")
+                if recursive.status_code in [200,403]:
+                    requestweb(type, value, port, words, word)
+            except:
+                pass
+
         elif r.status_code == 403:
             print(f"{type}://{value}:{port}/{word}     {Colour.Red}403{Colour.Reset}")
             file.write(f"\n{type}://{value}:{port}/{word} {Colour.Red}403{Colour.Reset}")
@@ -185,11 +194,11 @@ def main(argv):
                         # Checking if host:port is valid and will then enumerate
                         try:
                             if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
-                                requestweb("https", value, ports[choice], words)
+                                requestweb("https", value, ports[choice], words, "None")
                         except:
                             try:
                                 if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
-                                    requestweb("http", value, ports[choice], words)
+                                    requestweb("http", value, ports[choice], words, "None")
                             except:
                                 print("Port not scannable")
                         tmp = "dirb"
