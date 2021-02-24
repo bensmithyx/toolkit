@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/bin/env python3
 import os, subprocess, sys, re, getopt, signal, socket, requests, time
 from datetime import datetime
 
@@ -96,13 +96,23 @@ def getinput(option,range):
 def display(text):
     print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
 # Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
-def requestweb(type, value, port, word):
+def requestweb(type, value, port, words):
     globaltype[0] = type
-    r = requests.get(f"{type}://{value}:{port}/{word.strip()}")
-    if r.status_code == 200:
-        code200.append(word.strip())
-    elif r.status_code == 403:
-        code403.append(word.strip())
+    spaces = 0
+    for word in words:
+        word = word.strip()
+        formattedword = word+(" "*spaces)
+        spaces = len(word)
+        print(f"{type}://{value}:{port}/{formattedword}", end="\r")
+        r = requests.get(f"{type}://{value}:{port}/{word}")
+        file = open(".dirb","a")
+        if r.status_code == 200:
+            print(f"{type}://{value}:{port}/{word}"+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
+            file.write(f"\n{type}://{value}:{port}/{word} {Colour.Green}200{Colour.Reset}")
+        elif r.status_code == 403:
+            print(f"{type}://{value}:{port}/{word}     {Colour.Red}403{Colour.Reset}")
+            file.write(f"\n{type}://{value}:{port}/{word} {Colour.Red}403{Colour.Reset}")
+        file.close()
 # Start of the main body of code
 def main(argv):
     verbose = False
@@ -170,32 +180,18 @@ def main(argv):
                     else:
                         # Reading words from chosen wordlist
                         words = readfile(f"wordlists/{wordlist}")
-                        global code200, code403, globaltype
-                        code200, code403 = [],[]
+                        global globaltype
                         globaltype = ["none"]
                         # Checking if host:port is valid and will then enumerate
                         try:
                             if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
-                                [requestweb("https", value, ports[choice], word) for word in words]
+                                requestweb("https", value, ports[choice], words)
                         except:
                             try:
                                 if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
-                                    [requestweb("http", value, ports[choice], word) for word in words]
+                                    requestweb("http", value, ports[choice], words)
                             except:
                                 print("Port not scannable")
-                        # Outputing host scan to tmp file ".dirb" and cli
-                        file = open(".dirb", "w")
-                        print(f"Code {Colour.Green}200{Colour.Reset}")
-                        file.write(f"Code {Colour.Green}200{Colour.Reset}")
-                        for word in code200:
-                            print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
-                            file.write(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
-                        print(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
-                        file.write(f"\n{Colour.Red}Code 403{Colour.Reset}\n")
-                        for word in code403:
-                            print(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
-                            file.write(f"{globaltype[0]}://{value}:{ports[choice]}/{word}")
-                        file.close()
                         tmp = "dirb"
                 elif option == 2:
                     # If save it chosen it will save the desired output to a file
