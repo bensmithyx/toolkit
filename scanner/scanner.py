@@ -119,10 +119,10 @@ def requestweb(type, value, port, words, start):
             if r.status_code == 200:
                 #+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
                 print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
-                file.write("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
+                file.write("\n{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
             elif r.status_code == 403:
                 print("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
-                file.write("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
+                file.write("\n{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
             file.close()
             if recursivecheck:
                 requestweb(type, value, port, words, word)
@@ -248,6 +248,7 @@ if __name__ == "__main__":
   \___ \  / __|/ _` || '_ \ | '_ \  / _ \| '__|
   ____) || (__| (_| || | | || | | ||  __/| |
  |_____/  \___|\__,_||_| |_||_| |_| \___||_|\n{Colour.Red}\n{94*'-'}{Colour.Reset}""")
+    file = open(".dirb","w").close()
     main(sys.argv[1:])
     # Deletes tm files when prgram is exited
     os.system("rm .scan .dirb 2>/dev/null")
