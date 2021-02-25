@@ -8,5 +8,3 @@ git clone https://github.com/Cyb3rchad/toolkit.git
 ```
 
 ![Alt Text](https://github.com/Cyb3rchad/toolkit/blob/master/Documentation/Images/ezgif.com-gif-maker.gif)
-
-<img src="https://github.com/Cyb3rchad/toolkit/blob/master/Documentation/Images/ezgif.com-gif-maker.gif" width="40" height="40" />
