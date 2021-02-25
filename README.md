@@ -7,3 +7,4 @@ This is a toolkit to aid HackTheBox/CTF style challenges. There are a number of 
 git clone https://github.com/Cyb3rchad/toolkit.git
 ```
 
+![Alt Text](https://github.com/Cyb3rchad/toolkit/blob/master/Documentation/Images/ezgif.com-gif-maker.gif)
