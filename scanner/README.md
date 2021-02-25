@@ -15,7 +15,7 @@ Long argument | Short argument | Value
 
 # Machine with internet
 
-First time run
+Example
 ```
 python3 -t <host name/ip>
 ```
