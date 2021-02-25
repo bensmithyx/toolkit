@@ -17,5 +17,5 @@ Long argument | Short argument | Value
 
 Example
 ```
-python3 -t <host name/ip>
+python3 scanner.py -t <host name/ip>
 ```
