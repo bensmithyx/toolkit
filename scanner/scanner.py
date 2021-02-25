@@ -130,7 +130,7 @@ def main(argv):
     verbose = False
     # Options for argument inputation
     short_options = "ht:"
-    long_options = ["help", "targethost="]
+    long_options = ["help", "target="]
     # Help menu for users
     help = f"""\n{Colour.Colour4}
 
@@ -144,7 +144,7 @@ def main(argv):
 {Colour.Colour2}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.Colour3}value{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}
 {Colour.Colour2}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
-{Colour.Colour2}--targethost{Colour.Reset}     {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
+{Colour.Colour2}--target{Colour.Reset}     {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}hostname{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
         display(f"An argument must be set{help}")
@@ -158,7 +158,7 @@ def main(argv):
     for current_argument, value in arguments:
         if current_argument in ("-h", "--help"):
             print(f"\nDisplaying help:{help}")
-        elif current_argument in ("-t", "--targethost"):
+        elif current_argument in ("-t", "--target"):
             try:
                 # Checking if host is valid
                 ip = socket.gethostbyname(value)
