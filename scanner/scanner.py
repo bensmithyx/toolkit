@@ -144,7 +144,7 @@ def main(argv):
 {Colour.Colour2}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.Colour3}value{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}
 {Colour.Colour2}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
-{Colour.Colour2}--target{Colour.Reset}     {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}hostname{Colour.Reset}
+{Colour.Colour2}--target{Colour.Reset}         {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}hostname{Colour.Reset}
 {Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
         display(f"An argument must be set{help}")
