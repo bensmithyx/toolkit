@@ -117,7 +117,6 @@ def requestweb(type, value, port, words, start):
                 print("here")
             file = open(".dirb","a")
             if r.status_code == 200:
-                #+(" "*(20-spaces))+f"{Colour.Green}200{Colour.Reset}")
                 print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 file.write("\n{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
             elif r.status_code == 403:
