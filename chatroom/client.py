@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import tkinter as tk
+from tkinter import messagebox
 import socket
 import threading
 
@@ -10,13 +12,54 @@ year = x.year
 month = x.month
 day = x.day
 
-def encode_binary(value):
-    bits = 128 - value
-    num = '{0:b}'.format(bits)
-    while len(num) < 7:
-        num = "0%s" % num
-    num = "11%s" % num
-    return num
+window = tk.Tk()
+window.title("Client")
+username = " "
+userid = 'i'
+users = ['', '', '', '', '', '', '', '', '', '']
+
+topFrame = tk.Frame(window)
+lblName = tk.Label(topFrame, text = "Name:").pack(side=tk.LEFT)
+entName = tk.Entry(topFrame)
+entName.pack(side=tk.LEFT)
+btnConnect = tk.Button(topFrame, text="Connect", command=lambda : connect())
+btnConnect.pack(side=tk.LEFT)
+#btnConnect.bind('<Button-1>', connect)
+topFrame.pack(side=tk.TOP)
+
+displayFrame = tk.Frame(window)
+lblLine = tk.Label(displayFrame, text="*********************************************************************").pack()
+scrollBar = tk.Scrollbar(displayFrame)
+scrollBar.pack(side=tk.RIGHT, fill=tk.Y)
+tkDisplay = tk.Text(displayFrame, height=20, width=55)
+tkDisplay.pack(side=tk.LEFT, fill=tk.Y, padx=(5, 0))
+tkDisplay.tag_config("tag_your_message", foreground="blue")
+scrollBar.config(command=tkDisplay.yview)
+tkDisplay.config(yscrollcommand=scrollBar.set, background="#F4F6F7", highlightbackground="grey", state="disabled")
+displayFrame.pack(side=tk.TOP)
+
+
+bottomFrame = tk.Frame(window)
+tkMessage = tk.Text(bottomFrame, height=2, width=55)
+tkMessage.pack(side=tk.LEFT, padx=(5, 13), pady=(5, 10))
+tkMessage.config(highlightbackground="grey", state="disabled")
+tkMessage.bind("<Return>", (lambda event: getChatMessage(tkMessage.get("1.0", tk.END))))
+bottomFrame.pack(side=tk.BOTTOM)
+
+
+def connect():
+    global username, client
+    if len(entName.get()) < 1:
+        tk.messagebox.showerror(title="ERROR!!!", message="You MUST enter your first name <e.g. John>")
+    else:
+        username = entName.get()
+        connect_to_server(username)
+
+
+# network client
+client = None
+HOST_ADDR = "localhost"
+HOST_PORT = 2521
 
 def decode_binary(data):
     nums = []
@@ -40,6 +83,15 @@ def decode_binary(data):
             out.append(num)
     return out
 
+
+def encodebinary(value):
+    bits = 128 - value
+    num = '{0:b}'.format(bits)
+    while len(num) < 7:
+        num = "0%s" % num
+    num = "11%s" % num
+    return num
+
 def check(out, new, x):
     if out[new] == '':
         out[new] = x
@@ -55,8 +107,8 @@ def shift(day, month, year):
         new = shift % z
         check(out, new, alphabet[x])
     return out
-
-def encode_data(data):
+    
+def encodedata(data):
     global setting
     outputlist = []
     for d in data:
@@ -78,188 +130,195 @@ def round_down(n, decimals=0):
     rounded = math.floor(n * multiplier) / multiplier
     return rounded
 
-def send_user_data(client_send, data, userid):
-    global setting
-    client_send.send("u".encode())
-    client_send.send(str(userid).encode())
+def send_data(data):
+    global client, setting, userid
+    client.send("s".encode())
+    client.send(str(userid).encode())
     for d in data:
-        for s in encode_binary(setting.index(d)):
-            client_send.send(str(userid).encode())
+        for s in encodebinary(setting.index(str(d))):
+            client.send(str(userid).encode())
             time.sleep((float(s) + 1) / 10)
-    client_send.send(str(userid).encode())
-    client_send.send("f".encode())
+    client.send(str(userid).encode())
+    client.send("f".encode())
 
 setting = shift(day, month, year)
 
-
-window = tk.Tk()
-window.title("Sever")
-
-# Top frame consisting of two buttons widgets (i.e. btnStart, btnStop)
-topFrame = tk.Frame(window)
-btnStart = tk.Button(topFrame, text="Connect", command=lambda : start_server())
-btnStart.pack(side=tk.LEFT)
-btnStop = tk.Button(topFrame, text="Stop", command=lambda : stop_server(), state=tk.DISABLED)
-btnStop.pack(side=tk.LEFT)
-topFrame.pack(side=tk.TOP, pady=(5, 0))
-
-# Middle frame consisting of two labels for displaying the host and port info
-middleFrame = tk.Frame(window)
-lblHost = tk.Label(middleFrame, text = "Host: X.X.X.X")
-lblHost.pack(side=tk.LEFT)
-lblPort = tk.Label(middleFrame, text = "Port:XXXX")
-lblPort.pack(side=tk.LEFT)
-middleFrame.pack(side=tk.TOP, pady=(5, 0))
-
-# The client frame shows the client area
-clientFrame = tk.Frame(window)
-lblLine = tk.Label(clientFrame, text="**********Client List**********").pack()
-scrollBar = tk.Scrollbar(clientFrame)
-scrollBar.pack(side=tk.RIGHT, fill=tk.Y)
-tkDisplay = tk.Text(clientFrame, height=15, width=30)
-tkDisplay.pack(side=tk.LEFT, fill=tk.Y, padx=(5, 0))
-scrollBar.config(command=tkDisplay.yview)
-tkDisplay.config(yscrollcommand=scrollBar.set, background="#F4F6F7", highlightbackground="grey", state="disabled")
-clientFrame.pack(side=tk.BOTTOM, pady=(5, 10))
-
-
-server = None
-HOST_ADDR = "localhost"
-HOST_PORT = 2521
-client_name = " "
-clients = []
-clients_names = []
-
-
-# Start server function
-def start_server():
-    global server, HOST_ADDR, HOST_PORT # code is fine without this
-    btnStart.config(state=tk.DISABLED)
-    btnStop.config(state=tk.NORMAL)
-
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #print(socket.AF_INET)
-    #print(socket.SOCK_STREAM)
-
-    server.bind((HOST_ADDR, HOST_PORT))
-    server.listen(5)  # server is listening for client connection
-
-    threading._start_new_thread(accept_clients, (server, " "))
-
-    lblHost["text"] = "Host: " + HOST_ADDR
-    lblPort["text"] = "Port: " + str(HOST_PORT)
-
-
-# Stop server function
-def stop_server():
-    global server
-    btnStart.config(state=tk.NORMAL)
-    btnStop.config(state=tk.DISABLED)
-
-
-def accept_clients(the_server, y):
+def connect_to_server(name):
+    global client, HOST_PORT, HOST_ADDR, userid
+    #try:
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect((HOST_ADDR, HOST_PORT))
+    send_data(name)
+    id_data = []
     while True:
-        client, addr = the_server.accept()
-        clients.append(client)
-
-        # use a thread so as not to clog the gui thread
-        threading._start_new_thread(send_receive_client_message, (client, addr))
-
-
-# Function to receive message from current client AND
-# Send that message to other clients
-def send_receive_client_message(client_connection, client_ip_addr):
-    global server, client_name, clients, clients_addr
-    client_msg = " "
-    # send welcome message to client
-    username_data = []
-    while True:
-        t1 = time.time()
-        name_data  = client_connection.recv(1)
-        name_data = name_data.decode("utf-8")
-        if str(name_data) == "i":
-            t0 = time.time()
-            data = int(round_down(t0-t1,2) * 10)
-            if data != 0:
-                data -= 1
-            username_data.append(data)
-            
-        if str(name_data) == "f":
-            del username_data[0:2]
-            client_name = decode_data(decode_binary(username_data))
-            clients_names.append(client_name)
-            idx = get_client_index(clients, client_connection)
-            client_connection.send("n".encode())
-            client_connection.send(str(idx).encode())
-            client_connection.send("f".encode())
-            update_client_names_display(clients_names)
-            username_data = []
-            for c in clients:
-                idx = get_client_index(clients, client_connection)
-                if c != client_connection:
-                    send_user_data(c, clients_names[idx], idx)
-                else:
-                    for d in range(0, len(clients_names)):
-                        if d != idx:
-                            send_user_data(c, clients_names[d], d)
+        server_userid = client.recv(1)
+        server_userid = server_userid.decode("utf-8")
+        if str(server_userid) == "n":
+            server_userid = client.recv(1)
+            userid = server_userid.decode("utf-8")
+            server_fin = client.recv(1)
             break
 
+    if userid:
+        output_message = "Welcome " + username + ". Please type 'exit' to quit"
+        texts = tkDisplay.get("1.0", tk.END).strip()
+        tkDisplay.config(state=tk.NORMAL)
+        if len(texts) < 1:
+            tkDisplay.insert(tk.END, output_message)
+        else:
+            tkDisplay.insert(tk.END, "\n\n" + output_message)
+
+        tkDisplay.config(state=tk.DISABLED)
+        tkDisplay.see(tk.END)
+
+    entName.config(state=tk.DISABLED)
+    btnConnect.config(state=tk.DISABLED)
+    tkMessage.config(state=tk.NORMAL)
+
+    # start a thread to keep receiving message from server
+    # do not block the main thread :)
+    threading._start_new_thread(receive_message_from_server, (client, "m"))
+    #except Exception as e:
+        #tk.messagebox.showerror(title="ERROR!!!", message="Cannot connect to host: " + HOST_ADDR + " on port: " + str(HOST_PORT) + " Server may be Unavailable. Try again later")
+
+
+def receive_message_from_server(sck, m):
+    global username, userid, users
     while True:
-        idx = get_client_index(clients, client_connection)
-        client_msg = client_connection.recv(1)
-        for c in clients:
-            if c != client_connection:
-                c.send(client_msg)
-        if not client_msg:
-            break
+        from_server = sck.recv(1)
+        from_server = from_server.decode("utf-8")
+        print(from_server)
+        message_data = []
+        user_data = []
+        leave_data = []
+        change_data = []
+        while True:
+            t1 = time.time()
+            server_data  = sck.recv(1)
+            print(server_data)
+            if str(from_server) == "u":
+                server_data = server_data.decode("utf-8")
+                if str(server_data) == "f":
+                    del user_data[0:2]
+                    user_name = decode_data(decode_binary(user_data))
+                    users[int(id_data)] = user_name
+                    output_message = str(user_name) + " has joined the chat."
+                    texts = tkDisplay.get("1.0", tk.END).strip()
+                    tkDisplay.config(state=tk.NORMAL)
+                    if len(texts) < 1:
+                        tkDisplay.insert(tk.END, output_message)
+                    else:
+                        tkDisplay.insert(tk.END, "\n\n" + output_message)
 
-    # find the client index then remove from both lists(client name list and connection list)
-      # update client names display
-    old = []
-    
-    for o in clients:
-        client_idx = get_client_index(clients, o)
-        old.append(client_idx)
+                    tkDisplay.config(state=tk.DISABLED)
+                    tkDisplay.see(tk.END)
+                    user_data = []
+                    break
+                
+                t0 = time.time()
+                data = int(round_down(t0-t1,2) * 10)
+                if data != 0:
+                    data -= 1
+                user_data.append(data)
+                id_data = server_data.decode("utf-8")
+                
+            if str(from_server) == "l":
+                server_data = server_data.decode("utf-8")
+                if str(server_data) == "f":
+                    output_message = str(users[int(leave_data[0])]) + " has left the chat."
+                    texts = tkDisplay.get("1.0", tk.END).strip()
+                    tkDisplay.config(state=tk.NORMAL)
+                    if len(texts) < 1:
+                        tkDisplay.insert(tk.END, output_message)
+                    else:
+                        tkDisplay.insert(tk.END, "\n\n" + output_message)
+                    tkDisplay.config(state=tk.DISABLED)
+                    tkDisplay.see(tk.END)
+                    break
+                
+                leave_data.append(str(server_data))
 
-    idx = get_client_index(clients, client_connection)
-    del clients_names[idx]
-    del clients[idx]
-    del old[idx]
-    client_connection.close()
-    update_client_names_display(clients_names)
-    for c in clients:
-        c.send("l".encode())
-        c.send(str(idx).encode())
-        c.send("f".encode())
-        
-    for x in range(0, len(old)):
-        if int(x) != int(old[x]):
-            for c in clients:
-                c.send("c".encode())
-                c.send(str(old[x]).encode())
-                c.send(str(x).encode())
-                c.send("f".encode())
+            if str(from_server) == "c":
+                server_data = server_data.decode("utf-8")
+                if str(server_data) == "f":
+                    output_message = str(users[int(change_data[1])]) + " has left the chat."
+                    texts = tkDisplay.get("1.0", tk.END).strip()
+                    tkDisplay.config(state=tk.NORMAL)
+                    if len(texts) < 1:
+                        tkDisplay.insert(tk.END, output_message)
+                    else:
+                        tkDisplay.insert(tk.END, "\n\n" + output_message)
+                    tkDisplay.config(state=tk.DISABLED)
+                    tkDisplay.see(tk.END)
+                    
+                    if int(userid) == int(change_data[0]):
+                        userid = int(change_data[1])
+                        change_data = []
+                        break
+                    else:
+                        users[int(change_data[1])] = users[int(change_data[0])]
+                        users[int(change_data[0])] = ''
+                        change_data = []
+                        break
+                change_data.append(str(server_data))
+
+            if str(from_server) == "s":
+                server_data = server_data.decode("utf-8")
+                if str(server_data) == "f":
+                    del message_data[0:2]
+                    server_message = decode_data(decode_binary(message_data))
+                    output_message = str(users[int(id_data)]) + " >> " + server_message
+
+                    texts = tkDisplay.get("1.0", tk.END).strip()
+                    tkDisplay.config(state=tk.NORMAL)
+                    if len(texts) < 1:
+                        tkDisplay.insert(tk.END, output_message)
+                    else:
+                        tkDisplay.insert(tk.END, "\n\n"+ output_message)
+
+                    tkDisplay.config(state=tk.DISABLED)
+                    tkDisplay.see(tk.END)
+                    message_data = []
+                    break
+                
+                t0 = time.time()
+                data = int(round_down(t0-t1,2) * 10)
+                if data != 0:
+                    data -= 1
+                message_data.append(data)
+                id_data = server_data.decode("utf-8")
+
+    sck.close()
+    window.destroy()
 
 
-# Return the index of the current client in the list of clients
-def get_client_index(client_list, curr_client):
-    idx = 0
-    for conn in client_list:
-        if conn == curr_client:
-            break
-        idx = idx + 1
+def getChatMessage(msg):
 
-    return idx
+    msg = msg.replace('\n', '')
+    texts = tkDisplay.get("1.0", tk.END).strip()
 
-
-# Update client name display when a new client connects OR
-# When a connected client disconnects
-def update_client_names_display(name_list):
+    # enable the display area and insert the text and then disable.
+    # why? Apparently, tkinter does not allow use insert into a disabled Text widget :(
     tkDisplay.config(state=tk.NORMAL)
-    tkDisplay.delete('1.0', tk.END)
-    for c in name_list:
-        tkDisplay.insert(tk.END, c+"\n")
+    if len(texts) < 1:
+        tkDisplay.insert(tk.END, "You >> " + msg, "tag_your_message") # no line
+    else:
+        tkDisplay.insert(tk.END, "\n\n" + "You >> " + msg, "tag_your_message")
+
     tkDisplay.config(state=tk.DISABLED)
+
+    send_mssage_to_server(msg)
+
+    tkDisplay.see(tk.END)
+    tkMessage.delete('1.0', tk.END)
+
+
+def send_mssage_to_server(msg):
+    send_data(msg)
+    
+    if msg == "exit":
+        client.close()
+        window.destroy()
 
 
 window.mainloop()
