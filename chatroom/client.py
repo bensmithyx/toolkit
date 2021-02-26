@@ -16,7 +16,6 @@ window = tk.Tk()
 window.title("Client")
 username = " "
 
-
 topFrame = tk.Frame(window)
 lblName = tk.Label(topFrame, text = "Name:").pack(side=tk.LEFT)
 entName = tk.Entry(topFrame)
@@ -104,7 +103,7 @@ def shift(day, month, year):
         new = shift % z
         check(out, new, alphabet[x])
     return out
-    
+
 def encodedata(data):
     global setting
     outputlist = []
@@ -238,7 +237,7 @@ def getChatMessage(msg):
 def send_mssage_to_server(msg):
     #client.send(msg.encode())
     send_data(msg)
-    
+
     if msg == "exit":
         client.close()
         window.destroy()
