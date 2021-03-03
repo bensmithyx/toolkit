@@ -19,6 +19,7 @@ def encode_binary(value):
     return num
 
 def decode_binary(data):
+    print(data)
     nums = []
     out = []
     count = 0
@@ -28,14 +29,19 @@ def decode_binary(data):
             count += 1
             pass
         else:
-            temp += str(b)
+            if int(b) >= 5:
+                temp += "1"
+            else:
+                temp += "0"
             count += 1
             if count == 9:
                 nums.append(int(temp))
                 temp = ""
                 count = 0
     for n in nums:
-        out.append(256 - int(str(n), 2))
+        num = 256 - int(str(n), 2)
+        if num <= 96:
+            out.append(num)
     return out
 
 def check(out, new, x):
@@ -53,17 +59,6 @@ def shift(day, month, year):
         new = shift % z
         check(out, new, alphabet[x])
     return out
-
-def send_data(c, data):
-    global setting
-    c.send("1".encode())
-    c.send("2".encode())
-    for d in data:
-        for s in encode_binary(setting.index(d)):
-            c.send("2".encode())
-            time.sleep((float(s) + 1) / 10)
-    c.send("2".encode())
-    c.send("3".encode())
 
 def encode_data(data):
     global setting
@@ -86,6 +81,17 @@ def round_down(n, decimals=0):
     multiplier = 10 ** decimals
     rounded = math.floor(n * multiplier) / multiplier
     return rounded
+
+def send_user_data(client_send, data, userid):
+    global setting
+    client_send.send("u".encode())
+    client_send.send(str(userid).encode())
+    for d in data:
+        for s in encode_binary(setting.index(d)):
+            client_send.send(str(userid).encode())
+            time.sleep(((float(s) * 50) + 1) / 2000)
+    client_send.send(str(userid).encode())
+    client_send.send("f".encode())
 
 setting = shift(day, month, year)
 
@@ -123,120 +129,118 @@ clientFrame.pack(side=tk.BOTTOM, pady=(5, 10))
 
 server = None
 HOST_ADDR = "localhost"
-HOST_PORT = 25215
+HOST_PORT = 2521
 client_name = " "
 clients = []
 clients_names = []
 
-
-# Start server function
 def start_server():
-    global server, HOST_ADDR, HOST_PORT # code is fine without this
+    global server, HOST_ADDR, HOST_PORT
     btnStart.config(state=tk.DISABLED)
     btnStop.config(state=tk.NORMAL)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(socket.AF_INET)
-    print(socket.SOCK_STREAM)
 
     server.bind((HOST_ADDR, HOST_PORT))
-    server.listen(5)  # server is listening for client connection
+    server.listen(5)
 
     threading._start_new_thread(accept_clients, (server, " "))
 
     lblHost["text"] = "Host: " + HOST_ADDR
     lblPort["text"] = "Port: " + str(HOST_PORT)
 
-
-# Stop server function
 def stop_server():
     global server
     btnStart.config(state=tk.NORMAL)
     btnStop.config(state=tk.DISABLED)
 
-
 def accept_clients(the_server, y):
     while True:
         client, addr = the_server.accept()
         clients.append(client)
-
-        # use a thread so as not to clog the gui thread
         threading._start_new_thread(send_receive_client_message, (client, addr))
 
-
-# Function to receive message from current client AND
-# Send that message to other clients
 def send_receive_client_message(client_connection, client_ip_addr):
     global server, client_name, clients, clients_addr
     client_msg = " "
-    # send welcome message to client
     username_data = []
     while True:
         t1 = time.time()
         name_data  = client_connection.recv(1)
         name_data = name_data.decode("utf-8")
-        if int(name_data) == 2:
+        if str(name_data) == "i":
             t0 = time.time()
-            data = math.trunc((float(t0-t1)*10))
-            #binarychar = int(round_down((float(t0-t1) * 10),0) )
-            #print(binarychar)
+            data = int(round_down(t0-t1,2) * 2000)
+            if data != 0:
+                data -= 1
             username_data.append(data)
-        if int(name_data) == 3:
+            
+        if str(name_data) == "f":
+            del username_data[0:2]
+            client_name = decode_data(decode_binary(username_data))
+            clients_names.append(client_name)
+            idx = get_client_index(clients, client_connection)
+            client_connection.send("n".encode())
+            client_connection.send(str(idx).encode())
+            client_connection.send("f".encode())
+            update_client_names_display(clients_names)
+            username_data = []
+            for c in clients:
+                idx = get_client_index(clients, client_connection)
+                if c != client_connection:
+                    send_user_data(c, clients_names[idx], idx)
+                else:
+                    for d in range(0, len(clients_names)):
+                        if d != idx:
+                            send_user_data(c, clients_names[d], d)
             break
-    username_data = username_data[2:]
-    client_name = decode_data(decode_binary(username_data))
-    username_data = []
-    
-    client_connection.send("4".encode())
-    clients_names.append(client_name)
-    update_client_names_display(clients_names)  # update client names display
 
-    message_data = []
     while True:
+        idx = get_client_index(clients, client_connection)
         client_msg = client_connection.recv(1)
         for c in clients:
             if c != client_connection:
                 c.send(client_msg)
         if not client_msg:
             break
-        
-    idx = get_client_index(clients, client_connection)
-    sending_client_name = clients_names[idx]
-        
-    for c in clients:
-        if c != client_connection:
-            c.send("6".encode())
-            send_data(c, sending_client_name)
+    old = []
+    
+    for o in clients:
+        client_idx = get_client_index(clients, o)
+        old.append(client_idx)
 
-    # find the client index then remove from both lists(client name list and connection list)
     idx = get_client_index(clients, client_connection)
     del clients_names[idx]
     del clients[idx]
+    del old[idx]
     client_connection.close()
+    update_client_names_display(clients_names)
+    for c in clients:
+        c.send("l".encode())
+        c.send(str(idx).encode())
+        c.send("f".encode())
+        
+    for x in range(0, len(old)):
+        if int(x) != int(old[x]):
+            for c in clients:
+                c.send("c".encode())
+                c.send(str(old[x]).encode())
+                c.send(str(x).encode())
+                c.send("f".encode())
 
-    update_client_names_display(clients_names)  # update client names display
-
-
-# Return the index of the current client in the list of clients
 def get_client_index(client_list, curr_client):
     idx = 0
     for conn in client_list:
         if conn == curr_client:
             break
         idx = idx + 1
-
     return idx
 
-
-# Update client name display when a new client connects OR
-# When a connected client disconnects
 def update_client_names_display(name_list):
     tkDisplay.config(state=tk.NORMAL)
     tkDisplay.delete('1.0', tk.END)
-
     for c in name_list:
         tkDisplay.insert(tk.END, c+"\n")
     tkDisplay.config(state=tk.DISABLED)
-
 
 window.mainloop()
