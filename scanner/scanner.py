@@ -14,18 +14,21 @@ class Colour:
     Cyan = "\u001b[36m"
     Reset = "\u001b[0m"
     # Theme
-    Colour1 = Blue
-    Colour2 = Cyan
-    Colour3 = Red
-    Colour4 = White
-    Text = Yellow
-
+    bracketsymbol = Blue
+    normaltext = Cyan
+    plussymbol = Red
+    lines = White
+    text = Yellow
+# Each host scan is turned into an object
 class Scan:
     def __init__(self,ports,statuses,services):
         self.ports = ports
         self.statuses = statuses
         self.services = services
 
+class Dirb:
+    def __init__(self,files):
+        self.files = files
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
     os.system("rm .scan .dirb 2>/dev/null")
@@ -66,7 +69,6 @@ def scanner(ip):
                     services.append(service)
             sock.close()
         scans.append(Scan(ports,statuses,services))
-        return ports
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
         print("Exiting")
@@ -88,7 +90,7 @@ def readfile(filename):
 def getinput(option,range):
     while True:
         try:
-            choice = int(input(f"({Colour.Text}{option}{Colour.Reset}) > "))
+            choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
             if 0 <= choice <= range:
                 return choice
             else:
@@ -98,9 +100,10 @@ def getinput(option,range):
     return choice
 # Displays text in a nice colourful format
 def display(text):
-    print(f"\n{Colour.Colour1}[{Colour.Colour3}+{Colour.Colour1}]{Colour.Text} {text}{Colour.Reset}\n")
+    print(f"\n{Colour.bracketsymbol}[{Colour.plussymbol}+{Colour.bracketsymbol}]{Colour.text} {text}{Colour.Reset}\n")
 # Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
 def requestweb(type, value, port, words, start):
+    files = []
     recursivecheck = False
     globaltype[0] = type
     spaces = 0
@@ -121,14 +124,19 @@ def requestweb(type, value, port, words, start):
                 print("here")
             file = open(".dirb","a")
             if r.status_code == 200:
+                files.append("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 file.write("\n{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
             elif r.status_code == 403:
+                files.append("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
                 file.write("\n{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
             file.close()
             if recursivecheck:
                 requestweb(type, value, port, words, word)
+    # Clearing last output
+    print(" "*30, end="\r")
+    return files
 # Start of the main body of code
 def main(argv):
     global scans
@@ -138,7 +146,7 @@ def main(argv):
     short_options = "ht:"
     long_options = ["help", "target="]
     # Help menu for users
-    help = f"""\n{Colour.Colour4}
+    help = f"""\n{Colour.lines}
 
   _    _ ______ _      _____
  | |  | |  ____| |    |  __ \\
@@ -147,11 +155,11 @@ def main(argv):
  | |  | | |____| |____| |
  |_|  |_|______|______|_|
 ---------------------------------------------------------------------------------------------{Colour.Reset}
-{Colour.Colour2}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.Colour3}value{Colour.Reset}
-{Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}
-{Colour.Colour2}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.Colour3}n/a{Colour.Reset}
-{Colour.Colour2}--target{Colour.Reset}         {Colour.Magenta}-t{Colour.Reset}               {Colour.Colour3}hostname{Colour.Reset}
-{Colour.Colour4}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
+{Colour.normaltext}long argument{Colour.Reset}   {Colour.Magenta}short argument{Colour.Reset}    {Colour.plussymbol}value{Colour.Reset}
+{Colour.lines}---------------------------------------------------------------------------------------------{Colour.Reset}
+{Colour.normaltext}--help{Colour.Reset}           {Colour.Magenta}-h{Colour.Reset}               {Colour.plussymbol}n/a{Colour.Reset}
+{Colour.normaltext}--target{Colour.Reset}         {Colour.Magenta}-t{Colour.Reset}               {Colour.plussymbol}hostname{Colour.Reset}
+{Colour.lines}---------------------------------------------------------------------------------------------{Colour.Reset}\n"""
     if len(argv) <1:
         display(f"An argument must be set{help}")
     try:
@@ -183,26 +191,30 @@ def main(argv):
             t2 = datetime.now()
             print(f"PORT    STATUS    SERVICE\n")
             file.write(f"PORT    STATUS    SERVICE\n")
+            # Displaying output to cli and sotring output into a temp file in case it wants to be saved
             for port, status, service in zip(scans[0].ports,scans[0].statuses,scans[0].services):
-                print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
-                file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
+                print(f"{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
+                file.write(f"\n{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
             print(f"\nScantime - {t2-t1}")
             file.write(f"\nScantime - {t2-t1}")
             file.close()
             tmp = "scan"
+            # Setting default wordlist
             wordlist = "common.txt"
             while True:
                 # Displaying options
                 display("Options   [1] Dirb   [2] Save Scan   [3] Settings   [4] Exit")
                 option = getinput("options",4)
                 if option == 1:
-                    display(f"Which port would you like to dirb <exit - {len(ports)+1}>")
-                    for index, port in enumerate(ports):
+                    display(f"Which port would you like to dirb")
+                    # Displaying all ports found
+                    for index, port in enumerate(scans[0].ports):
                         print(f"{index} - {port}")
+                    print(f"{len(scans[0].ports)+1} - Exit")
                     print("\n")
                     # Asking which port the user wants to input by showing them the ports found
-                    choice = getinput("dirb", len(ports)+1)
-                    if choice == len(ports)+1:
+                    choice = getinput("dirb", len(scans[0].ports))
+                    if choice == len(scans[0].ports):
                         display("Exited")
                     else:
                         # Reading words from chosen wordlist
@@ -211,14 +223,15 @@ def main(argv):
                         globaltype = ["none"]
                         # Checking if host:port is valid and will then enumerate
                         try:
-                            if requests.get(f"https://{value}:{ports[choice]}/").status_code == 200:
-                                requestweb("https", value, ports[choice], words, "None")
+
+                            if requests.get(f"https://{value}:{scans[0].ports[choice]}/").status_code == 200:
+                                dirbs = requestweb("https", value, scans[0].ports[choice], words, "None")
                         except:
                             try:
-                                if requests.get(f"http://{value}:{ports[choice]}/").status_code == 200:
-                                    requestweb("http", value, ports[choice], words, "None")
+                                if requests.get(f"http://{value}:{scans[0].ports[choice]}/").status_code == 200:
+                                    dirbs = requestweb("http", value, scans[0].ports[choice], words, "None")
                             except:
-                                print("Port not scannable")
+                                pass
                         tmp = "dirb"
                 elif option == 2:
                     # If save it chosen it will save the desired output to a file
