@@ -2,7 +2,6 @@
 import os, subprocess, sys, re, getopt, signal, socket, requests, time
 from datetime import datetime
 
-
 # Adding in colourful text
 class Colour:
     Black = "\u001b[30m"
@@ -21,6 +20,11 @@ class Colour:
     Colour4 = White
     Text = Yellow
 
+class scan:
+    def __init__(self,ports,statuses,services):
+        self.ports = ports
+        self.status = statuses
+        self.services = services
 
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
@@ -34,17 +38,20 @@ signal.signal(signal.SIGINT, crash)
 # Finds service of ports
 def servicescan(port,protocal):
     try:
-        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{socket.getservbyport(port, protocal)}{Colour.Reset}\n{30*'-'}")
+        service = socket.getservbyport(port, protocal)
+        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{service}{Colour.Reset}\n{30*'-'}")
         file = open(".scan","a")
-        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{socket.getservbyport(port, protocal)}{Colour.Reset}\n{30*'-'}")
+        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{service}{Colour.Reset}\n{30*'-'}")
         file.close()
-        return True
+        return service
     except:
         return False
 
 # Scans host for open ports
 def scanner(ip):
     ports = []
+    statuses = []
+    services = []
     try:
         # Opening file to append scan
         file = open(".scan","w")
@@ -57,14 +64,21 @@ def scanner(ip):
             result = sock.connect_ex((ip, port))
             if result == 0:
                 ports.append(port)
+                statuses.append("open")
                 # if service is not found using tcp or udp it will be unknown
-                if not servicescan(port,"tcp"):
+                service = servicescan(port,"tcp")
+                if not service:
                     if not servicescan(port,"udp"):
+                        services.append("Unknown")
                         file = open(".scan","a")
                         print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
                         file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
                         file.close()
+                else:
+                    services.append(service)
+                scans.append(scan(ports,statuses,services))
             sock.close()
+        scans.append(scan(ports,statuses,services))
         return ports
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
@@ -130,6 +144,8 @@ def requestweb(type, value, port, words, start):
                 requestweb(type, value, port, words, word)
 # Start of the main body of code
 def main(argv):
+    global scans
+    scans = []
     verbose = False
     # Options for argument inputation
     short_options = "ht:"
@@ -239,7 +255,6 @@ def main(argv):
                     break
             else:
                 display(f"\nInvalid Parameters:{help}")
-
 
 if __name__ == "__main__":
     # Title for program starts
