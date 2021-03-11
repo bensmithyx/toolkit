@@ -20,7 +20,7 @@ class Colour:
     Colour4 = White
     Text = Yellow
 
-class scan:
+class Scan:
     def __init__(self,ports,statuses,services):
         self.ports = ports
         self.status = statuses
@@ -76,9 +76,8 @@ def scanner(ip):
                         file.close()
                 else:
                     services.append(service)
-                scans.append(scan(ports,statuses,services))
             sock.close()
-        scans.append(scan(ports,statuses,services))
+        scans.append(Scan(ports,statuses,services))
         return ports
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
