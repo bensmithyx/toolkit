@@ -23,7 +23,7 @@ class Colour:
 class Scan:
     def __init__(self,ports,statuses,services):
         self.ports = ports
-        self.status = statuses
+        self.statuses = statuses
         self.services = services
 
 # When ctrl+c is pressed listfile with be removed to clean up the directory
@@ -39,25 +39,16 @@ signal.signal(signal.SIGINT, crash)
 def servicescan(port,protocal):
     try:
         service = socket.getservbyport(port, protocal)
-        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{service}{Colour.Reset}\n{30*'-'}")
-        file = open(".scan","a")
-        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{service}{Colour.Reset}\n{30*'-'}")
-        file.close()
         return service
     except:
         return False
 
 # Scans host for open ports
 def scanner(ip):
-    ports = []
-    statuses = []
-    services = []
+    # Creating arrays for values of the ports, status of the ports and servivce of the ports to be populated with
+    ports, statuses, services = [],[],[]
     try:
-        # Opening file to append scan
-        file = open(".scan","w")
-        print(f"PORT    SERVICE\n")
-        file.write(f"PORT    SERVICE\n{30*'-'}")
-        file.close()
+        display(f"Scanning ({Colour.Red}{ip}{Colour.Yellow})")
         # Scanning all ports
         for port in range(65535):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -65,15 +56,12 @@ def scanner(ip):
             if result == 0:
                 ports.append(port)
                 statuses.append("open")
-                # if service is not found using tcp or udp it will be unknown
+                # If service is not found using tcp or udp it will be unknown
                 service = servicescan(port,"tcp")
                 if not service:
+                    # If the service is not found for tcp or udp is will set service as unknown
                     if not servicescan(port,"udp"):
                         services.append("Unknown")
-                        file = open(".scan","a")
-                        print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
-                        file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}Unknown{Colour.Reset}\n{30*'-'}")
-                        file.close()
                 else:
                     services.append(service)
             sock.close()
@@ -183,13 +171,22 @@ def main(argv):
             except:
                 display("Invalid host")
                 sys.exit(0)
-            # Starting host scan
-            display(f"Scanning {value}")
+            #
+            # Displaying output of host scan to the user.
+            #print(f"Scanning {ip}")
+            # Opening file to append scan
+            file = open(".scan","w")
+            # Scanning all ports
             t1 = datetime.now()
-            ports = scanner(value)
+            # Running host scan
+            scanner(value)
             t2 = datetime.now()
+            print(f"PORT    STATUS    SERVICE\n")
+            file.write(f"PORT    STATUS    SERVICE\n")
+            for port, status, service in zip(scans[0].ports,scans[0].statuses,scans[0].services):
+                print(f"{Colour.Colour2}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
+                file.write(f"\n{Colour.Colour2}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
             print(f"\nScantime - {t2-t1}")
-            file = open(".scan","a")
             file.write(f"\nScantime - {t2-t1}")
             file.close()
             tmp = "scan"
