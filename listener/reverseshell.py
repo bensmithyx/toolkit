@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import requests
 r = requests.get("https://raw.githubusercontent.com/swisskyrepo/PayloadsAllTheThings/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md")
 #print(r.content)
