@@ -19,16 +19,19 @@ class Colour:
     plussymbol = Red
     lines = White
     text = Yellow
-# Each host scan is turned into an object
+
+# Each host scan is turned into an object so the data can be retrieved more easily
 class Scan:
     def __init__(self,ports,statuses,services):
         self.ports = ports
         self.statuses = statuses
         self.services = services
 
+# Each drib scan will turn into an object so the data can be retrieved more easily
 class Dirb:
     def __init__(self,files):
         self.files = files
+
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
     os.system("rm .scan .dirb 2>/dev/null")
@@ -86,6 +89,7 @@ def readfile(filename):
         lines = file.readlines()
     file.close()
     return lines
+
 # Function to get input with formated and coloured chacters
 def getinput(option,range):
     while True:
@@ -98,9 +102,11 @@ def getinput(option,range):
         except Exception:
             display("Invalid Option")
     return choice
+
 # Displays text in a nice colourful format
 def display(text):
     print(f"\n{Colour.bracketsymbol}[{Colour.plussymbol}+{Colour.bracketsymbol}]{Colour.text} {text}{Colour.Reset}\n")
+
 # Checks if requests gets 200 or 403 response and appends the successfull attempts to an array
 def requestweb(type, value, port, words, start):
     files = []
@@ -137,6 +143,7 @@ def requestweb(type, value, port, words, start):
     # Clearing last output
     print(" "*30, end="\r")
     return files
+
 # Start of the main body of code
 def main(argv):
     global scans
