@@ -95,7 +95,7 @@ def getinput(option,range):
     while True:
         try:
             choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
-            if 0 <= choice <= range:
+            if 0 < choice <= range:
                 return choice
             else:
                 display("Invalid Option")
@@ -178,7 +178,7 @@ def main(argv):
     # Evaluate given options
     for current_argument, value in arguments:
         if current_argument in ("-h", "--help"):
-            print(f"\nDisplaying help:{help}")
+            print(help)
         elif current_argument in ("-t", "--target"):
             try:
                 # Checking if host is valid
@@ -216,21 +216,21 @@ def main(argv):
                     display(f"Which port would you like to dirb")
                     # Displaying all ports found
                     for index, port in enumerate(scans[0].ports):
-                        print(f"{index} - {port}")
-                    print(f"{len(scans[0].ports)} - Exit")
+                        print(f"{index+1} - {port}")
+                    print(f"{len(scans[0].ports)+1} - Exit")
                     print("\n")
                     # Asking which port the user wants to input by showing them the ports found
-                    choice = getinput("dirb", len(scans[0].ports))
-                    if choice == len(scans[0].ports):
+                    choice = getinput("dirb", len(scans[0].ports)+1)
+                    if choice == len(scans[0].ports)+1:
                         display("Exited")
                     else:
+                        choice -=1
                         # Reading words from chosen wordlist
                         words = readfile(f"wordlists/{wordlist}")
                         global globaltype
                         globaltype = ["none"]
                         # Checking if host:port is valid and will then enumerate
                         try:
-
                             if requests.get(f"https://{value}:{scans[0].ports[choice]}/").status_code == 200:
                                 dirbs = requestweb("https", value, scans[0].ports[choice], words, "None")
                         except:
@@ -238,7 +238,7 @@ def main(argv):
                                 if requests.get(f"http://{value}:{scans[0].ports[choice]}/").status_code == 200:
                                     dirbs = requestweb("http", value, scans[0].ports[choice], words, "None")
                             except:
-                                pass
+                                print("Port not scannable or KeyboardInterrupt")
                         tmp = "dirb"
                 elif option == 2:
                     # If save it chosen it will save the desired output to a file
@@ -260,7 +260,7 @@ def main(argv):
                         directory = os.listdir("wordlists")
                         for index, list in enumerate(directory):
                             if list[-4:] == ".txt":
-                                print(f"{index} - {list}")
+                                print(f"{index+1} - {list}")
                         choice = getinput("wordlists", len(directory)-1)
                         wordlist = directory[choice]
                         display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
