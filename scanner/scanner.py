@@ -122,6 +122,7 @@ def requestweb(type, value, port, words, start):
         print(f"{type}://{value}:{port}/{formattedword}", end="\r")
         r = requests.get(f"{type}://{value}:{port}/{word}")
         if r.status_code in [200,403]:
+            # Checking if it is a file or directory
             try:
                 recursive = requests.get(f"{type}://{value}:{port}/{word}/")
                 if recursive.status_code in [200,403]:
@@ -130,10 +131,12 @@ def requestweb(type, value, port, words, start):
                 pass
             file = open(".dirb","a")
             if r.status_code == 200:
+                # Formating output for cli and save file for 200 codes
                 files.append("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 file.write("\n{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
             elif r.status_code == 403:
+                # Formating output for cli and save file for 403 codes
                 files.append("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
                 file.write("\n{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
