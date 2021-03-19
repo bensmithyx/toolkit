@@ -127,7 +127,7 @@ def requestweb(type, value, port, words, start):
                 if recursive.status_code in [200,403]:
                     recursivecheck = True
             except:
-                print("here")
+                pass
             file = open(".dirb","a")
             if r.status_code == 200:
                 files.append("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
@@ -237,8 +237,8 @@ def main(argv):
                             try:
                                 if requests.get(f"http://{value}:{scans[0].ports[choice]}/").status_code == 200:
                                     dirbs = requestweb("http", value, scans[0].ports[choice], words, "None")
-                            except:
-                                print("Port not scannable or KeyboardInterrupt")
+                            except Exception as exception:
+                                print("Port not scannable")
                         tmp = "dirb"
                 elif option == 2:
                     # If save it chosen it will save the desired output to a file
