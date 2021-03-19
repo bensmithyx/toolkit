@@ -217,7 +217,7 @@ def main(argv):
                     # Displaying all ports found
                     for index, port in enumerate(scans[0].ports):
                         print(f"{index} - {port}")
-                    print(f"{len(scans[0].ports)+1} - Exit")
+                    print(f"{len(scans[0].ports)} - Exit")
                     print("\n")
                     # Asking which port the user wants to input by showing them the ports found
                     choice = getinput("dirb", len(scans[0].ports))
