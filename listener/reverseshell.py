@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #get the code from reverescripts.txt and output to screen splitting victim and attacker
 def main():
     machine = int(input("Is this the Attacker machine (1) or the Victim machine (2)?\n"))
