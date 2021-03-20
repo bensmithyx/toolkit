@@ -261,10 +261,10 @@ def main(argv):
                     if choice == 1:
                         # Fidning all txt files in wordlist so directories are ignored
                         directory = os.listdir("wordlists")
-                        for index, list in enumerate(directory):
+                        for index, list in enumerate(directory, 1):
                             if list[-4:] == ".txt":
-                                print(f"{index+1} - {list}")
-                        choice = getinput("wordlists", len(directory)-1)
+                                print(f"{index} - {list}")
+                        choice = getinput("wordlists", len(directory))-1
                         wordlist = directory[choice]
                         display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
                     elif choice == 2:
