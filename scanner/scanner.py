@@ -264,9 +264,13 @@ def main(argv):
                         for index, list in enumerate(directory, 1):
                             if list[-4:] == ".txt":
                                 print(f"{index} - {list}")
-                        choice = getinput("wordlists", len(directory))-1
-                        wordlist = directory[choice]
-                        display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
+                        print(f"{len(directory)+1} - Exit\n")
+                        choice = getinput("wordlists", len(directory)+1)-1
+                        if choice == len(directory):
+                            display("Exited")
+                        else:
+                            wordlist = directory[choice]
+                            display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
                     elif choice == 2:
                         display("Exited")
                 elif option == 4:
