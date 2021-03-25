@@ -1,6 +1,5 @@
 # Listener
 <span style="font-family: Baskerville Old Face; font-size: 1em;">
-# Reverse Shell Database Ideas:
 
 ## How it works
 Our program will take an IP Address and Port and will run similar to the pull exploits script where it will take payloads from a website: <https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md#bash-udp>
