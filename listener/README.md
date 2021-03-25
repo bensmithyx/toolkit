@@ -10,7 +10,7 @@ which can normally be run to connect to it. The victim will run a payload given 
 - In C or Python write a piece of code which can be linked onto the main code program which will allow the user to enter in their IP address and port then it will instruct the user to open a listener on their pc at the same port then it will try to execute the payload.
 - We could also follow how Ben did it with his pull exploits program as this is a very similar to our tool.
 
-## Ideas:\
+## Ideas:
 - Add the commands to a separate file and read. - OFFLINE  MODE
 
 # Enumeration ideas:
