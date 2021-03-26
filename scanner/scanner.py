@@ -22,19 +22,21 @@ class Colour:
 
 # Each host scan is turned into an object so the data can be retrieved more easily
 class Scan:
-    def __init__(self,ports,statuses,services):
+    def __init__(self,ports,statuses,services,host,time):
         self.ports = ports
         self.statuses = statuses
         self.services = services
+        self.host = host
+        self.time = time
 
-# Each drib scan will turn into an object so the data can be retrieved more easily
+# Each dirb scan will turn into an object so the data can be retrieved more easily
 class Dirb:
-    def __init__(self,files):
+    def __init__(self,files,host):
         self.files = files
+        self.host = host
 
 # When ctrl+c is pressed listfile with be removed to clean up the directory
 def crash(sig, frame):
-    os.system("rm .scan .dirb 2>/dev/null")
     display("Exited")
     sys.exit(0)
 
@@ -50,13 +52,22 @@ def servicescan(port,protocal):
         return False
 
 # Scans host for open ports
-def scanner(ip):
+def scanner(ip,portranges):
+    top_ports = [20,21,22,23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080,8000]
+    if portranges == "top-ports":
+        portrange = top_ports
+    elif portranges == "all-ports":
+        portrange = list(range(65535))
+    else:
+        display("Invalid range set")
+        return 0
     # Creating arrays for values of the ports, status of the ports and servivce of the ports to be populated with
     ports, statuses, services = [],[],[]
     try:
         display(f"Scanning ({Colour.Red}{ip}{Colour.Yellow})")
-        # Scanning all ports
-        for port in range(65535):
+        # Scanning all ports 65535
+        t1 = datetime.now()
+        for port in portrange:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex((ip, port))
             if result == 0:
@@ -71,7 +82,9 @@ def scanner(ip):
                 else:
                     services.append(service)
             sock.close()
-        scans.append(Scan(ports,statuses,services))
+        t2 = datetime.now()
+        scans.append(Scan(ports,statuses,services,ip,t2-t1))
+
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
         print("Exiting")
@@ -129,28 +142,25 @@ def requestweb(type, value, port, words, start):
                     recursivecheck = True
             except:
                 pass
-            file = open(".dirb","a")
             if r.status_code == 200:
                 # Formating output for cli and save file for 200 codes
                 files.append("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
-                file.write("\n{}://{}:{}/{}{}{}{}{}200{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Green,Colour.Reset))
             elif r.status_code == 403:
                 # Formating output for cli and save file for 403 codes
                 files.append("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
                 print("{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
-                file.write("\n{}://{}:{}/{}{}{}{}{}403{}".format(type,value,port,'\x1b[1;34m' if recursivecheck == True else '\u001b[0m',word,Colour.Reset,(" "*(25-len(word))),Colour.Red,Colour.Reset))
-            file.close()
             if recursivecheck:
                 requestweb(type, value, port, words, word)
     # Clearing last output
-    print(" "*30, end="\r")
-    return files
+    print(" "*50, end="\r")
+    dirbslist.append(Dirb(files,value))
 
 # Start of the main body of code
 def main(argv):
-    global scans
+    global scans, dirbslist
     scans = []
+    dirbslist = []
     verbose = False
     # Options for argument inputation
     short_options = "ht:"
@@ -189,42 +199,48 @@ def main(argv):
             except:
                 display("Invalid host")
                 sys.exit(0)
-            #
             # Displaying output of host scan to the user.
-            #print(f"Scanning {ip}")
-            # Opening file to append scan
-            file = open(".scan","w")
-            # Scanning all ports
-            t1 = datetime.now()
             # Running host scan
-            scanner(value)
-            t2 = datetime.now()
+            scanner(value,"top-ports")
             print(f"PORT    STATUS    SERVICE\n")
-            file.write(f"PORT    STATUS    SERVICE\n")
             # Displaying output to cli and sotring output into a temp file in case it wants to be saved
-            for port, status, service in zip(scans[0].ports,scans[0].statuses,scans[0].services):
+            for port, status, service in zip(scans[-1].ports,scans[-1].statuses,scans[-1].services):
                 print(f"{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
-                file.write(f"\n{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
-            print(f"\nScantime - {t2-t1}")
-            file.write(f"\nScantime - {t2-t1}")
-            file.close()
-            tmp = "scan"
+            print(f"\nScantime - {scans[-1].time}")
             # Setting default wordlist
             wordlist = "common.txt"
+            portrange = "top-ports"
             while True:
                 # Displaying options
-                display("Options   [1] Dirb   [2] Save Scan   [3] Settings   [4] Exit")
-                option = getinput("options",4)
+                display("Options   [1] Scan   [2] Dirb   [3] Save   [4] Settings   [5] Exit")
+                option = getinput("options",5)
                 if option == 1:
+                    try:
+                        # Checking if host is valid
+                        ip = socket.gethostbyname(input(f"({Colour.text}host{Colour.Reset}) > "))
+                    except:
+                        display("Invalid host")
+                    else:
+                        #
+                        # Displaying output of host scan to the user.
+                        # Scanning all ports
+                        # Running host scan
+                        scanner(value,portrange)
+                        print(f"PORT    STATUS    SERVICE\n")
+                        # Displaying output to cli and sotring output into a temp file in case it wants to be saved
+                        for port, status, service in zip(scans[-1].ports,scans[-1].statuses,scans[-1].services):
+                            print(f"{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
+                        print(f"\nScantime - {scans[-1].time}")
+                elif option == 2:
                     display(f"Which port would you like to dirb")
                     # Displaying all ports found
-                    for index, port in enumerate(scans[0].ports):
+                    for index, port in enumerate(scans[-1].ports):
                         print(f"{index+1} - {port}")
-                    print(f"{len(scans[0].ports)+1} - Exit")
+                    print(f"{len(scans[-1].ports)+1} - Exit")
                     print("\n")
                     # Asking which port the user wants to input by showing them the ports found
-                    choice = getinput("dirb", len(scans[0].ports)+1)
-                    if choice == len(scans[0].ports)+1:
+                    choice = getinput("dirb", len(scans[-1].ports)+1)
+                    if choice == len(scans[-1].ports)+1:
                         display("Exited")
                     else:
                         choice -=1
@@ -234,46 +250,82 @@ def main(argv):
                         globaltype = ["none"]
                         # Checking if host:port is valid and will then enumerate
                         try:
-                            if requests.get(f"https://{value}:{scans[0].ports[choice]}/").status_code == 200:
-                                dirbs = requestweb("https", value, scans[0].ports[choice], words, "None")
+                            if requests.get(f"https://{value}:{scans[-1].ports[choice]}/").status_code == 200:
+                                requestweb("https", value, scans[-1].ports[choice], words, "None")
                         except:
                             try:
-                                if requests.get(f"http://{value}:{scans[0].ports[choice]}/").status_code == 200:
-                                    dirbs = requestweb("http", value, scans[0].ports[choice], words, "None")
+                                if requests.get(f"http://{value}:{scans[-1].ports[choice]}/").status_code == 200:
+                                    requestweb("http", value, scans[-1].ports[choice], words, "None")
                             except Exception as exception:
+                                print(exception)
                                 print("Port not scannable")
-                        tmp = "dirb"
-                elif option == 2:
-                    # If save it chosen it will save the desired output to a file
-                    tmpfile = ".scan"
-                    filename = "scan"
-                    if tmp == "dirb":
-                        tmpfile = ".dirb"
-                        filename = "dirb"
-                    file = open(filename,"w")
-                    for line in readfile(tmpfile):
-                        file.write(line)
-                    file.close()
-                    display(f"File save to {filename}")
                 elif option == 3:
-                    display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})   [2] Exit{Colour.Reset}")
-                    choice = getinput("Settings", 2)
-                    if choice == 1:
-                        # Fidning all txt files in wordlist so directories are ignored
-                        directory = os.listdir("wordlists")
-                        for index, list in enumerate(directory, 1):
-                            if list[-4:] == ".txt":
-                                print(f"{index} - {list}")
-                        print(f"{len(directory)+1} - Exit\n")
-                        choice = getinput("wordlists", len(directory)+1)-1
-                        if choice == len(directory):
+                    display("Options   [1] Save Scan   [2] Save Dirb   [3] Exit")
+                    option = getinput("options",3)
+
+                    if option == 1:
+                        display("Which scan would you like to save?")
+                        for index, scan in enumerate(scans,1):
+                            print(f"{index} - {scan.host}")
+                        print(f"{len(scans)+1} - Exit\n")
+                        choice = getinput("scans",len(scans)+1)
+                        if choice == len(scans)+1:
                             display("Exited")
                         else:
-                            wordlist = directory[choice]
-                            display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
-                    elif choice == 2:
+                            file = open(f"{scans[choice-1].host}.scan","w")
+                            file.write(f"PORT    STATUS    SERVICE\n")
+                            for port, status, service in zip(scans[choice-1].ports,scans[choice-1].statuses,scans[choice-1].services):
+                                file.write(f"\n{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
+                            file.write(f"\nScantime - {scans[choice-1].time}")
+                            file.close()
+                            display(f"File save to {scans[choice-1].host}.scan")
+                    if option == 2:
+                        display("Which scan would you like to save?")
+                        for index, dirbscan in enumerate(dirbslist,1):
+                            print(f"{index} - {dirbscan.host}")
+                        print(f"{len(dirbslist)+1} - Exit\n")
+                        choice = getinput("scans",len(dirbslist)+1)
+                        if choice == len(dirbslist)+1:
+                            display("Exited")
+                        else:
+                            file = open(f"{dirbslist[choice-1].host}.dirb","w")
+                            for directory in dirbslist[choice-1].files:
+                                file.write(f"{directory}\n")
+                            file.close()
+                            display(f"File save to {dirbslist[choice-1].host}.dirb")
+                    elif option == 3:
                         display("Exited")
                 elif option == 4:
+                    while True:
+                        display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})    [2] Port Range({Colour.Red}{portrange}{Colour.Yellow})    [3] Exit{Colour.Reset}")
+                        choice = getinput("Settings", 3)
+                        if choice == 1:
+                            # Fidning all txt files in wordlist so directories are ignored
+                            directory = os.listdir("wordlists")
+                            for index, list in enumerate(directory, 1):
+                                if list[-4:] == ".txt":
+                                    print(f"{index} - {list}")
+                            print(f"{len(directory)+1} - Exit\n")
+                            choice = getinput("wordlists", len(directory)+1)-1
+                            if choice == len(directory):
+                                display("Exited")
+                            else:
+                                wordlist = directory[choice]
+                                display(f"Set wordlist to {Colour.Red}{wordlist}{Colour.Reset}")
+                        elif choice == 2:
+                            portranges = ["top-ports","all-ports","Exit"]
+                            for index, label in enumerate(portranges,1):
+                                print(f"{index} - {label}")
+                            choice = getinput("portsrange", 3)-1
+                            if portranges[choice] == "Exit":
+                                display("Exited")
+                            else:
+                                portrange = portranges[choice]
+                                display(f"Set port range to {Colour.Red}{portrange}{Colour.Reset}")
+                        elif choice == 3:
+                            display("Exited")
+                            break
+                elif option == 5:
                     display("Exited")
                     break
             else:
@@ -291,4 +343,3 @@ if __name__ == "__main__":
     file = open(".dirb","w").close()
     main(sys.argv[1:])
     # Deletes tm files when prgram is exited
-    os.system("rm .scan .dirb 2>/dev/null")
