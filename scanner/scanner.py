@@ -114,6 +114,14 @@ def getinput(option,range):
         except Exception:
             display("Invalid Option")
     return choice
+    
+# This function allows the user to display a formatted menu to the cli and get input based on the options provided
+def menu(options):
+    print(f"{Colour.bracketsymbol}[{Colour.plussymbol}+{Colour.bracketsymbol}]{Colour.Yellow} {options[0]}   ",end="")
+    for index, option in enumerate(options[1:],1):
+        print(f"{Colour.Yellow}[{index}] {option}   ",end="")
+    print(f"{Colour.Reset}\n")
+    return getinput(options[0], len(options)-1)
 
 # Displays text in a nice colourful format
 def display(text):
@@ -211,8 +219,7 @@ def main(argv):
             portrange = "top-ports"
             while True:
                 # Displaying options
-                display("Options   [1] Scan   [2] Dirb   [3] Save   [4] Settings   [5] Exit")
-                option = getinput("options",5)
+                option = menu(["Options","Scan","Dirb","Save","Settings","Exit"])
                 if option == 1:
                     try:
                         # Checking if host is valid
@@ -260,9 +267,7 @@ def main(argv):
                                 print("Port not scannable")
                 elif option == 3:
                     # Allows the user to save both host scans and directory scans
-                    display("Options   [1] Save Scan   [2] Save Dirb   [3] Exit")
-                    option = getinput("options",3)
-
+                    option = menu(["Options","Save Scan","Save Dirb","Exit"])
                     if option == 1:
                         display("Which scan would you like to save?")
                         for index, scan in enumerate(scans,1):
@@ -297,8 +302,7 @@ def main(argv):
                         display("Exited")
                 elif option == 4:
                     while True:
-                        display(f"Settings    [1] Wordlist({Colour.Red}{wordlist}{Colour.Yellow})    [2] Port Range({Colour.Red}{portrange}{Colour.Yellow})    [3] Exit{Colour.Reset}")
-                        choice = getinput("Settings", 3)
+                        choice = menu(["Settings",f"Wordlist({Colour.Red}{wordlist}{Colour.Yellow})",f"Port Range({Colour.Red}{portrange}{Colour.Yellow})","Exit"])
                         if choice == 1:
                             # Fidning all txt files in wordlist so directories are ignored
                             directory = os.listdir("wordlists")
