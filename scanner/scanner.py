@@ -84,7 +84,6 @@ def scanner(ip,portranges):
             sock.close()
         t2 = datetime.now()
         scans.append(Scan(ports,statuses,services,ip,t2-t1))
-
     # If ctrl+c is pressed it will display "Exited"
     except KeyboardInterrupt:
         print("Exiting")
@@ -260,6 +259,7 @@ def main(argv):
                                 print(exception)
                                 print("Port not scannable")
                 elif option == 3:
+                    # Allows the user to save both host scans and directory scans
                     display("Options   [1] Save Scan   [2] Save Dirb   [3] Exit")
                     option = getinput("options",3)
 
