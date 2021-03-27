@@ -340,6 +340,5 @@ if __name__ == "__main__":
   \___ \  / __|/ _` || '_ \ | '_ \  / _ \| '__|
   ____) || (__| (_| || | | || | | ||  __/| |
  |_____/  \___|\__,_||_| |_||_| |_| \___||_|\n{Colour.Red}\n{94*'-'}{Colour.Reset}""")
-    file = open(".dirb","w").close()
     main(sys.argv[1:])
     # Deletes tm files when prgram is exited
