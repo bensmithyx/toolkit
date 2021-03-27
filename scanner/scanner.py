@@ -272,13 +272,13 @@ def main(argv):
                         if choice == len(scans)+1:
                             display("Exited")
                         else:
-                            file = open(f"{scans[choice-1].host}.scan","w")
+                            file = open(f"{scans[choice-1].host}-{portrange}.scan","w")
                             file.write(f"PORT    STATUS    SERVICE\n")
                             for port, status, service in zip(scans[choice-1].ports,scans[choice-1].statuses,scans[choice-1].services):
                                 file.write(f"\n{Colour.normaltext}{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}{Colour.Reset}\n{30*'-'}")
                             file.write(f"\nScantime - {scans[choice-1].time}")
                             file.close()
-                            display(f"File save to {scans[choice-1].host}.scan")
+                            display(f"File save to {scans[choice-1].host}-{portrange}.scan")
                     if option == 2:
                         display("Which scan would you like to save?")
                         for index, dirbscan in enumerate(dirbslist,1):
@@ -288,11 +288,11 @@ def main(argv):
                         if choice == len(dirbslist)+1:
                             display("Exited")
                         else:
-                            file = open(f"{dirbslist[choice-1].host}.dirb","w")
+                            file = open(f"{dirbslist[choice-1].host}-{wordlist}.dirb","w")
                             for directory in dirbslist[choice-1].files:
                                 file.write(f"{directory}\n")
                             file.close()
-                            display(f"File save to {dirbslist[choice-1].host}.dirb")
+                            display(f"File save to {dirbslist[choice-1].host}-{wordlist}.dirb")
                     elif option == 3:
                         display("Exited")
                 elif option == 4:
