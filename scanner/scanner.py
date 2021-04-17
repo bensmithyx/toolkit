@@ -234,7 +234,7 @@ def main(argv):
                         # Displaying output of host scan to the user.
                         # Scanning all ports
                         # Running host scan
-                        scanner(value,portrange)
+                        scanner(ip,portrange)
                         print(f"PORT    STATUS    SERVICE\n")
                         # Displaying output to cli and sotring output into a temp file in case it wants to be saved
                         for port, status, service in zip(scans[-1].ports,scans[-1].statuses,scans[-1].services):
