@@ -28,55 +28,62 @@ def displayerror(text): #display in similar format to display(text) but with x i
 
 def get_scan_type():
     display("Which type of scan would you like to carry out?")
-    scans = ["Light scan","Medium scan","Full scan","Custom scan"]
+    scans = ["Custom scan","Light scan","Medium scan","Full scan"]
     for i in range(4):
         print(f"{Colour.Colour4}{i} - {Colour.Colour2}{scans[i]}{Colour.Reset}")
     try:
         scan = int(input(f"({Colour.Text}Scan Selection{Colour.Reset}) > "))
     except ValueError:
-        displayerror("Error, please enter an integer value")
+        displayerror("Error: please enter an integer value")
         return get_scan_type()
     else:
         if scan not in range(4):
-            displayerror("Option entered not in correct range for scans, try again")
+            displayerror("Option entered not in correct range, try again")
             return get_scan_type()
         return scan
 
 def get_custom_options():
     options = []
     
-    display("Which scan options would you like to include?")
-
     enter_options_again = True
     while enter_options_again == True:
-        print(f"{Colour.Colour2}Enter the option numbers with a space in between each one, eg '2 5 7 10'{Colour.Reset}")
-        
-        options = ["Full scan","Targeted scan","Operating system information","Root cron jobs","Root processes"]
-        for i in range(len(options)):
-            print(f"{Colour.Colour4}{i} - {Colour.Colour2}{options[i]}{Colour.Reset}")
-        
+        # Asks the user which scan options they want in their custom scan, showing the user which scan options correlate to which scan number.
+        display("Which scan options would you like to include?")
+        print(f"{Colour.Colour2}Enter the option numbers with a space between each one, eg '2 7 16'{Colour.Reset}")
+        option_list = ["System information","Device information","Process information","Network information","User information","Software information","File scan"]
+        for i in range(len(option_list)):
+            print(f"{Colour.Colour4}{i} - {Colour.Colour2}{option_list[i]}{Colour.Reset}")
+    
+        # gets the scan options that the user wants by searching the user input for each of the scan option numbers and placing them into their own list. This means that the option numbers are now stored in the correct order and duplicates are eliminated.
         user_input = " " + input(f"({Colour.Text}Option Selection{Colour.Reset}) > ") + " "
-        for i in range(1, 21):
+        for i in range(len(option_list)):
             if user_input.find(" " + str(i) + " ") != -1:
                 options.append(i)
-
-        print("Your scan: ", end=" ")
-        for i in options:
-            print(i, end=" ")
-        print("\n")
     
+        # shows the user what the computer has interpreted as their scan from their input.
+        print(f"\n{Colour.Colour2}Your scan: ", end=" ")
+        for i in options:
+            if i != options[len(options) - 1]:
+                print(option_list[i], end=", ")
+            else:
+                print(f"{option_list[i]}{Colour.Reset}")
+    
+        # asks the user if they are happy with these options, or if they want to try chosing their options again
         reenter_options = ""
-        while reenter_options != "y" and reenter_options != "n":
-            print("Are you happy with these options? Enter 'y' to continue or 'n' to try again:")
-            reenter_options = input(" > ")
-            if reenter_options == "y":
-                enter_options_again = False
-            elif reenter_options == "n":
+        while reenter_options != "1" and reenter_options != "0":
+            display("Are you happy with the options you have selected?")
+            options = ["No","Yes"]
+            for i in range(2):
+                print(f"{Colour.Colour4}{i} - {Colour.Colour2}{options[i]}{Colour.Reset}")
+
+            reenter_options = input(f"({Colour.Text}Option Confirmation{Colour.Reset}) > ")
+            if reenter_options == "1":
+                return options
+            elif reenter_options == "0":
                 options = []
             else:
                 displayerror("Invalid option, try again")
-    
-    return options    
+             
 def get_save():
     display("Would you like to save the scan to a file? (JSON format)")
     options = ["No","Yes"]
@@ -158,7 +165,7 @@ def targeted_file_scan():
 def main():
     scan = get_scan_type()
     scan_options = []
-    if scan == 3: #if it is a custom scan
+    if scan == 0: #if it is a custom scan
     	scan_options = get_custom_options()
     	
     save = get_save()
@@ -167,17 +174,17 @@ def main():
         filename = scan_save() #can you mess this up by typing in ../ or something?
     
     if scan == 0:
+        display("Custom scan commencing...")
+        scan_custom(scan_options)
+    elif scan == 1:
     	display("Light scan commencing...")
     	scan_light()
-    elif scan == 1:
+    elif scan == 2:
     	display("Medium scan commencing...")
     	scan_medium()
-    elif scan == 2:
+    else: # if scan == 3
     	display("Full scan commencing...")
     	scan_full()
-    else: # if scan == 3
-    	display("Custom scan commencing...")
-    	scan_custom(scan_options)
     
     display("The scan has been completed")
 
