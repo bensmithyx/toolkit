@@ -50,7 +50,7 @@ def get_custom_options():
         # Asks the user which scan options they want in their custom scan, showing the user which scan options correlate to which scan number.
         display("Which scan options would you like to include?")
         print(f"{Colour.Colour2}Enter the option numbers with a space between each one, eg '2 7 16'{Colour.Reset}")
-        option_list = ["System information","Device information","Process information","Network information","User information","Software information","File scan"]
+        option_list = ["OS information","SUDO version","Environment variable information","Defences information","DMESG signature information","Drive information","Root owned cron jobs","Root owned running processes","Timers","Sockets","D-BUS","Network information","Information on current user","Information on all users","SUDO permissions","Clipboard and highlighted text","PGP keys","Common password brute force","List of useful binaries","Screen and TMUX sessions","Root owned SUID/SGID files","File permissions of sensitive files","Hashes in passwd file","Path information","Hidden files","Log files","Writeable files","Recently modified files", "Files containing passwords","Files with unexpected ACL"]
         for i in range(len(option_list)):
             print(f"{Colour.Colour4}{i} - {Colour.Colour2}{option_list[i]}{Colour.Reset}")
     
@@ -72,9 +72,9 @@ def get_custom_options():
         reenter_options = ""
         while reenter_options != "1" and reenter_options != "0":
             display("Are you happy with the options you have selected?")
-            options = ["No","Yes"]
+            answer_options = ["No","Yes"]
             for i in range(2):
-                print(f"{Colour.Colour4}{i} - {Colour.Colour2}{options[i]}{Colour.Reset}")
+                print(f"{Colour.Colour4}{i} - {Colour.Colour2}{answer_options[i]}{Colour.Reset}")
 
             reenter_options = input(f"({Colour.Text}Option Confirmation{Colour.Reset}) > ")
             if reenter_options == "1":
@@ -123,6 +123,7 @@ def scan_full():
 def scan_custom(scan_options):
     for i in scan_options:
     	scan(i)
+    	print(i)
 
 def title(name):
     os.system('echo ')
@@ -132,94 +133,94 @@ def title(name):
 
 def scan(option_num):
     if option_num == 0: # OS information
-    	title("OS SYSTEM INFORMATION")
+        title("OS SYSTEM INFORMATION")
         os.system('(cat /proc/version || uname -a ) 2>/dev/null; lsb_release -a 2>/dev/null')
     elif option_num == 1: # SUDO version
         title("SUDO VERSION")    
         os.system('sudo -V 2>/dev/null')
     elif option_num == 2: # Environment variables information
-    	title("ENVIRONMENT VARIABLES INFORMATION")
+        title("ENVIRONMENT VARIABLES INFORMATION")
         os.system('(env || set) 2>/dev/null')
     elif option_num == 3: # Defensive measures information
-    	title("DEFENSIVE MEASURES INFORMATION")    
+        title("DEFENSIVE MEASURES INFORMATION")    
         os.system('')
     elif option_num == 4: # Dmesg signature authentication failed
-    	title("DMESG SIGNATURE INFORMATION")    
+        title("DMESG SIGNATURE INFORMATION")    
         os.system('')
     elif option_num == 5: # Drives
-    	title("DEVICE INFORMATION")    
+        title("DEVICE INFORMATION")    
         os.system('')
     elif option_num == 6: # Cron jobs belonging to the root user
-    	title("ROOT CRON JOBS")    
+        title("ROOT CRON JOBS")    
         os.system('')
     elif option_num == 7: # Running processes belonging to the root user
-    	title("ROOT PROCESSES")    
+        title("ROOT PROCESSES")    
         os.system('')
     elif option_num == 8: # Check timers
-    	title("TIMERS")    
+        title("TIMERS")    
         os.system('')
     elif option_num == 9: # Look at sockets
-    	title("SOCKETS")    
+        title("SOCKETS")    
         os.system('')
     elif option_num == 10: # D-BUS
-    	title("D-BUS")    
+        title("D-BUS")    
         os.system('')
     elif option_num == 11: # Network information
-    	title("NETWORK INFORMATION")    
+        title("NETWORK INFORMATION")    
         os.system('(ip addr show || ifconfig) 2>/dev/null; (ss -auntp || netstat -auntp) 2>/dev/null; (route -n || ip route show) 2>/dev/null; (arp -n || ip neigh show) 2>/dev/null')
     elif option_num == 12: # Current user information
-    	title("CURRENT USER INFORMATION")    
+        title("CURRENT USER INFORMATION")    
         os.system('id || (whoami && groups) 2>/dev/null')
     elif option_num == 13: # All user information
-    	title("INFORMATION ON ALL USERS")    
-        os.system('cat /etc/passwd | cut -d: -f1; cat /etc/passwd | grep "sh$"; awk -F: '($3 == "0") {print}' /etc/passwd; w; last | tail; lastlog; for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort')
+        title("INFORMATION ON ALL USERS")    
+        os.system('''cat /etc/passwd | cut -d: -f1; cat /etc/passwd | grep "sh$"; awk -F: '($3 == "0") {print}' /etc/passwd; w; last | tail; lastlog; for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort''')
     elif option_num == 14: # SUDO permissions
-    	title("SUDO PERMISSIONS")    
+        title("SUDO PERMISSIONS")    
         os.system('sudo -l 2>/dev/null')
     elif option_num == 15: # Clipboard and highlighted text
-    	title("CLIPBOARD AND HIGHLIGHTED TEXT")    
+        title("CLIPBOARD AND HIGHLIGHTED TEXT")    
         os.system('')
     elif option_num == 16: # PGP keys
-    	title("PGP KEYS")    
+        title("PGP KEYS")    
         os.system('gpg --list-keys 2>/dev/null')
     elif option_num == 17: # Common password list brute force
-    	title("COMMON PASSWORD BRUTE FORCE")    
+        title("COMMON PASSWORD BRUTE FORCE")    
         os.system('')
     elif option_num == 18: # Useful binaries list
-    	title("USEFUL BINARIES")    
+        title("USEFUL BINARIES")    
         os.system('')
     elif option_num == 19: # Screen and TMUX sessions
-    	title("SCREEN AND TMUX SESSIONS")    
+        title("SCREEN AND TMUX SESSIONS")    
         os.system('')
     elif option_num == 20: # Root owned files with SUID or SGID bits set
-    	title("SUID AND SGID ROOT OWNED FILES")    
+        title("SUID AND SGID ROOT OWNED FILES")    
         os.system('')
     elif option_num == 21: # File permissions of sensitive files
-    	title("FILE PERMISSIONS FOR SENSITIVE FILES")    
+        title("FILE PERMISSIONS FOR SENSITIVE FILES")    
         os.system('ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null')
     elif option_num == 22: # Looking for hashes in /etc/passwd
-    	title("HASHES IN PASSWD FILE")    
+        title("HASHES IN PASSWD FILE")    
         os.system('')
     elif option_num == 23: # Path information
-    	title("PATH INFORMATION")    
+        title("PATH INFORMATION")    
         os.system('echo $PATH 2>/dev/null')
     elif option_num == 24: # List of hidden files
-    	title("HIDDEN FILES")    
+        title("HIDDEN FILES")    
         os.system('')
     elif option_num == 25: # Log files
-    	title("LOG FILES")    
+        title("LOG FILES")    
         os.system('')
     elif option_num == 26: # List of writeable files
-    	title("WRITEABLE FILES")    
+        title("WRITEABLE FILES")    
         os.system('')
     elif option_num == 27: # List of recently modified files
-    	title("RECENTLY MODIFIED FILES")    
+        title("RECENTLY MODIFIED FILES")    
         os.system('')
     elif option_num == 28: # Searching files that contain passwords
-    	title("FILES CONTAINING PASSWORDS")    
+        title("FILES CONTAINING PASSWORDS")    
         os.system('')
     elif option_num == 29: # Unexpected ACL
-    	title("FILES WITH UNEXPECTED ACL")    
+        title("FILES WITH UNEXPECTED ACL")    
         os.system('')
 
 def main():
