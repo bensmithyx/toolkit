@@ -106,61 +106,121 @@ def scan_save():
     return name+".json"
 
 def scan_light():
-    targeted_file_scan()
-    	
+    light_scan_options = [0,1,2,4,12,13,14,18,21,23]
+    for i in light_scan_options:
+        scan(i)
 
 def scan_medium():
-    targeted_file_scan()
-
+    medium_scan_options = [0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26]
+    for i in medium_scan_options:
+        scan(i)
 
 def scan_full():
-    full_file_scan()
-
+    full_scan_options = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
+    for i in full_scan_options:
+        scan(i)
 
 def scan_custom(scan_options):
     for i in scan_options:
     	scan(i)
-    	
+
+def title(name):
+    os.system('echo ')
+    #print(output)
+    os.system('%s %s %s' % ("echo '########## ", str(name), " ##########'"))
+    os.system('echo ')
 
 def scan(option_num):
-    if option_num == 0:
-    	# full file scan
-    	display("Full file scan commencing...")
-    	full_file_scan()
-    	display("Full file scan completed")
-    elif option_num == 1:
-    	# targeted file scan
-    	display("Targeted file scan commencing...")
-    	targeted_file_scan()
-    	display("Targeted file scan completed")
-    elif option_num == 2:
-    	display(" commencing...")
-    elif option_num == 3:
-    	display(" commencing...")
-    elif option_num == 4:
-    	display(" commencing...")
-    elif option_num == 5:
-    	display(" commencing...")
-    elif option_num == 6:
-    	display(" commencing...")
-    elif option_num == 7:
-    	display(" commencing...")
-    elif option_num == 8:
-    	display(" commencing...")
-    elif option_num == 9:
-    	display(" commencing...")
-    elif option_num == 10:
-    	display(" commencing...")
-    elif option_num == 11:
-    	display(" commencing...")
-    elif option_num == 12:
-    	display(" commencing...")
-
-def full_file_scan():
-    display(" commencing...")
-
-def targeted_file_scan():
-    display(" commencing...")	
+    if option_num == 0: # OS information
+    	title("OS SYSTEM INFORMATION")
+        os.system('(cat /proc/version || uname -a ) 2>/dev/null; lsb_release -a 2>/dev/null')
+    elif option_num == 1: # SUDO version
+        title("SUDO VERSION")    
+        os.system('sudo -V 2>/dev/null')
+    elif option_num == 2: # Environment variables information
+    	title("ENVIRONMENT VARIABLES INFORMATION")
+        os.system('(env || set) 2>/dev/null')
+    elif option_num == 3: # Defensive measures information
+    	title("DEFENSIVE MEASURES INFORMATION")    
+        os.system('')
+    elif option_num == 4: # Dmesg signature authentication failed
+    	title("DMESG SIGNATURE INFORMATION")    
+        os.system('')
+    elif option_num == 5: # Drives
+    	title("DEVICE INFORMATION")    
+        os.system('')
+    elif option_num == 6: # Cron jobs belonging to the root user
+    	title("ROOT CRON JOBS")    
+        os.system('')
+    elif option_num == 7: # Running processes belonging to the root user
+    	title("ROOT PROCESSES")    
+        os.system('')
+    elif option_num == 8: # Check timers
+    	title("TIMERS")    
+        os.system('')
+    elif option_num == 9: # Look at sockets
+    	title("SOCKETS")    
+        os.system('')
+    elif option_num == 10: # D-BUS
+    	title("D-BUS")    
+        os.system('')
+    elif option_num == 11: # Network information
+    	title("NETWORK INFORMATION")    
+        os.system('(ip addr show || ifconfig) 2>/dev/null; (ss -auntp || netstat -auntp) 2>/dev/null; (route -n || ip route show) 2>/dev/null; (arp -n || ip neigh show) 2>/dev/null')
+    elif option_num == 12: # Current user information
+    	title("CURRENT USER INFORMATION")    
+        os.system('id || (whoami && groups) 2>/dev/null')
+    elif option_num == 13: # All user information
+    	title("INFORMATION ON ALL USERS")    
+        os.system('cat /etc/passwd | cut -d: -f1; cat /etc/passwd | grep "sh$"; awk -F: '($3 == "0") {print}' /etc/passwd; w; last | tail; lastlog; for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort')
+    elif option_num == 14: # SUDO permissions
+    	title("SUDO PERMISSIONS")    
+        os.system('sudo -l 2>/dev/null')
+    elif option_num == 15: # Clipboard and highlighted text
+    	title("CLIPBOARD AND HIGHLIGHTED TEXT")    
+        os.system('')
+    elif option_num == 16: # PGP keys
+    	title("PGP KEYS")    
+        os.system('gpg --list-keys 2>/dev/null')
+    elif option_num == 17: # Common password list brute force
+    	title("COMMON PASSWORD BRUTE FORCE")    
+        os.system('')
+    elif option_num == 18: # Useful binaries list
+    	title("USEFUL BINARIES")    
+        os.system('')
+    elif option_num == 19: # Screen and TMUX sessions
+    	title("SCREEN AND TMUX SESSIONS")    
+        os.system('')
+    elif option_num == 20: # Root owned files with SUID or SGID bits set
+    	title("SUID AND SGID ROOT OWNED FILES")    
+        os.system('')
+    elif option_num == 21: # File permissions of sensitive files
+    	title("FILE PERMISSIONS FOR SENSITIVE FILES")    
+        os.system('ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null')
+    elif option_num == 22: # Looking for hashes in /etc/passwd
+    	title("HASHES IN PASSWD FILE")    
+        os.system('')
+    elif option_num == 23: # Path information
+    	title("PATH INFORMATION")    
+        os.system('echo $PATH 2>/dev/null')
+    elif option_num == 24: # List of hidden files
+    	title("HIDDEN FILES")    
+        os.system('')
+    elif option_num == 25: # Log files
+    	title("LOG FILES")    
+        os.system('')
+    elif option_num == 26: # List of writeable files
+    	title("WRITEABLE FILES")    
+        os.system('')
+    elif option_num == 27: # List of recently modified files
+    	title("RECENTLY MODIFIED FILES")    
+        os.system('')
+    elif option_num == 28: # Searching files that contain passwords
+    	title("FILES CONTAINING PASSWORDS")    
+        os.system('')
+    elif option_num == 29: # Unexpected ACL
+    	title("FILES WITH UNEXPECTED ACL")    
+        os.system('')
 
 def main():
     scan = get_scan_type()
