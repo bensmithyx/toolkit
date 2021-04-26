@@ -123,7 +123,6 @@ def scan_full():
 def scan_custom(scan_options):
     for i in scan_options:
     	scan(i)
-    	print(i)
 
 def title(name):
     os.system('echo ')
@@ -143,13 +142,31 @@ def scan(option_num):
         os.system('(env || set) 2>/dev/null')
     elif option_num == 3: # Defensive measures information
         title("DEFENSIVE MEASURES INFORMATION")    
-        os.system('')
+        os.system('echo AppArmor:')
+        os.system('if [ `which aa-status 2>/dev/null` ]; then aa-status; elif [ `which apparmor_status 2>/dev/null` ]; then apparmor_status; elif ls -d /etc/apparmor* 2>/dev/null; then echo; else echo "Not found AppArmor"; fi')
+        os.system('echo && echo Grsecurity:')
+        os.system('((uname -r | grep "\-grsec" >/dev/null 2>&1 || grep "grsecurity" /etc/sysctl.conf >/dev/null 2>&1) && echo "Yes" || echo "Not found grsecurity")')
+        os.system('echo && echo PaX:')
+        os.system('(which paxctl-ng paxctl >/dev/null 2>&1 && echo "Yes" || echo "Not found PaX")')
+        os.system('echo && echo Execshield:')
+        os.system('(grep "exec-shield" /etc/sysctl.conf || echo "Not found Execshield")')
+        os.system('echo && echo SElinux:')
+        os.system('(sestatus 2>/dev/null || echo "Not found sestatus")')
+        os.system('echo && echo ASLR:')
+        os.system('if [ `cat /proc/sys/kernel/randomize_va_space 2>/dev/null` ]; then if [ `cat /proc/sys/kernel/randomize_va_space 2>/dev/null | grep 1` ]; then echo "Conservative Randomization enabled"; elif [ `cat /proc/sys/kernel/randomize_va_space 2>/dev/null | grep 2` ]; then echo "Full Randomization enabled"; else echo "ASLR disabled"; fi; fi')
     elif option_num == 4: # Dmesg signature authentication failed
         title("DMESG SIGNATURE INFORMATION")    
-        os.system('')
+        os.system('dmesg 2>/dev/null | grep "signature"')
     elif option_num == 5: # Drives
         title("DEVICE INFORMATION")    
-        os.system('')
+        os.system('echo Date:')
+        os.system('date 2>/dev/null')
+        os.system('echo && echo System Stats:')
+        os.system('(df -h || lsblk))')
+        os.system('echo && echo CPU:')
+        os.system('lscpu')
+        os.system('echo && echo Printers:')
+        os.system('lpstat -a 2>/dev/null')
     elif option_num == 6: # Cron jobs belonging to the root user
         title("ROOT CRON JOBS")    
         os.system('')
@@ -158,16 +175,23 @@ def scan(option_num):
         os.system('')
     elif option_num == 8: # Check timers
         title("TIMERS")    
-        os.system('')
+        os.system('systemctl list-timers --all | cat')
     elif option_num == 9: # Look at sockets
         title("SOCKETS")    
-        os.system('')
+        os.system('netstat -a -p --unix') #outputs alot of info
     elif option_num == 10: # D-BUS
         title("D-BUS")    
         os.system('')
     elif option_num == 11: # Network information
-        title("NETWORK INFORMATION")    
-        os.system('(ip addr show || ifconfig) 2>/dev/null; (ss -auntp || netstat -auntp) 2>/dev/null; (route -n || ip route show) 2>/dev/null; (arp -n || ip neigh show) 2>/dev/null')
+        title("NETWORK INFORMATION")
+        os.system('echo IP addresses:')
+        os.system('(ip addr show || ifconfig) 2>/dev/null')
+        os.system('echo && echo Ports:')
+        os.system('(ss -auntp || netstat -auntp) 2>/dev/null')
+        os.system('echo && echo Routing:')
+        os.system('(ip route show || route -n) 2>/dev/null')
+        os.system('echo && echo ARP cache:')
+        os.system('(ip neigh show || arp -n) 2>/dev/null')
     elif option_num == 12: # Current user information
         title("CURRENT USER INFORMATION")    
         os.system('id || (whoami && groups) 2>/dev/null')
@@ -179,7 +203,7 @@ def scan(option_num):
         os.system('sudo -l 2>/dev/null')
     elif option_num == 15: # Clipboard and highlighted text
         title("CLIPBOARD AND HIGHLIGHTED TEXT")    
-        os.system('')
+        os.system('if [ `which xclip 2>/dev/null` ]; then echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`; echo "Highlighted text: "`xclip -o 2>/dev/null`; elif [ `which xsel 2>/dev/null` ]; then echo "Clipboard: "`xsel -ob 2>/dev/null`; echo "Highlighted text: "`xsel -o 2>/dev/null`; else echo "Not found xsel and xclip"; fi')
     elif option_num == 16: # PGP keys
         title("PGP KEYS")    
         os.system('gpg --list-keys 2>/dev/null')
@@ -188,10 +212,13 @@ def scan(option_num):
         os.system('')
     elif option_num == 18: # Useful binaries list
         title("USEFUL BINARIES")    
-        os.system('')
+        os.system('which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null')
     elif option_num == 19: # Screen and TMUX sessions
         title("SCREEN AND TMUX SESSIONS")    
-        os.system('')
+        os.system('echo Screen:')
+        os.system('if [ `which screen 2>/dev/null` ]; then (screen -ls); else echo "Screen not found"; fi')
+        os.system('echo && echo Tmux:')
+        os.system('if [ `which tmux 2>/dev/null` ]; then (tmux ls); else echo "Tmux not found"; fi')
     elif option_num == 20: # Root owned files with SUID or SGID bits set
         title("SUID AND SGID ROOT OWNED FILES")    
         os.system('')
@@ -200,7 +227,12 @@ def scan(option_num):
         os.system('ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null')
     elif option_num == 22: # Looking for hashes in /etc/passwd
         title("HASHES IN PASSWD FILE")    
-        os.system('')
+        os.system('echo Passwd equivalent files:')
+        os.system('cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null')
+        os.system('echo && echo Shadow equivalent files:')
+        os.system('cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null')
+        os.system('echo && echo Password hashes:')
+        os.system("grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null")
     elif option_num == 23: # Path information
         title("PATH INFORMATION")    
         os.system('echo $PATH 2>/dev/null')
@@ -215,7 +247,7 @@ def scan(option_num):
         os.system('')
     elif option_num == 27: # List of recently modified files
         title("RECENTLY MODIFIED FILES")    
-        os.system('')
+        os.system('find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null')
     elif option_num == 28: # Searching files that contain passwords
         title("FILES CONTAINING PASSWORDS")    
         os.system('')
