@@ -100,29 +100,21 @@ def get_save():
             return get_save()
         return save
 
-def scan_save():
-    display("Enter the name you want to save the file as")
-    name = input(f"({Colour.Text}Filename Selection{Colour.Reset}) > ")
-    return name+".json"
-
-def scan_light():
-    light_scan_options = [0,1,2,4,12,13,14,18,21,23]
-    for i in light_scan_options:
-        scan(i)
-
-def scan_medium():
-    medium_scan_options = [0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26]
-    for i in medium_scan_options:
-        scan(i)
-
-def scan_full():
-    full_scan_options = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
-    for i in full_scan_options:
-        scan(i)
-
-def scan_custom(scan_options):
-    for i in scan_options:
-    	scan(i)
+def get_filename():
+    valid_filename = False
+    while valid_filename == False:
+        display("Enter the name you want to save the file as")
+        name = input(f"({Colour.Text}Filename Selection{Colour.Reset}) > ") + ".txt"
+        try:
+            f = open(name,"x")
+        except FileExistsError:
+            displayerror("File already exists, please try a different filename")
+        except:
+            displayerror("Filename is not valid, please try a different filename")
+        else:
+            f.close()
+            valid_filename = True
+    return name
 
 def title(name):
     os.system('echo ')
@@ -256,28 +248,37 @@ def scan(option_num):
         os.system('')
 
 def main():
-    scan = get_scan_type()
+    scan_type = get_scan_type()
     scan_options = []
-    if scan == 0: #if it is a custom scan
+    if scan_type == 0: #if it is a custom scan
     	scan_options = get_custom_options()
     	
+    # This asks the user if they want to save the results of their scan to a file, and if they do, it asks the user what name they want to give to the file
     save = get_save()
     filename = ""
     if save == 1:
-        filename = scan_save() #can you mess this up by typing in ../ or something?
+        filename = get_filename()
     
-    if scan == 0:
+    if scan_type == 0:
         display("Custom scan commencing...")
-        scan_custom(scan_options)
-    elif scan == 1:
-    	display("Light scan commencing...")
-    	scan_light()
-    elif scan == 2:
-    	display("Medium scan commencing...")
-    	scan_medium()
-    else: # if scan == 3
-    	display("Full scan commencing...")
-    	scan_full()
+        for i in scan_options:
+    	    print(i)
+    	    scan(i)
+    elif scan_type == 1:
+        display("Light scan commencing...")
+        light_scan_options = [0,1,2,4,12,13,14,18,21,23]
+        for i in light_scan_options:
+            scan(i)
+    elif scan_type == 2:
+        display("Medium scan commencing...")
+        medium_scan_options = [0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26]
+        for i in medium_scan_options:
+            scan(i)
+    else:
+        display("Full scan commencing...")
+        full_scan_options = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
+        for i in full_scan_options:
+            scan(i)
     
     display("The scan has been completed")
 
