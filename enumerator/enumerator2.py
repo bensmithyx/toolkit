@@ -262,7 +262,6 @@ def main():
     if scan_type == 0:
         display("Custom scan commencing...")
         for i in scan_options:
-    	    print(i)
     	    scan(i)
     elif scan_type == 1:
         display("Light scan commencing...")
