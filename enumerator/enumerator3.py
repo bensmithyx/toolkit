@@ -424,7 +424,7 @@ def main():
                 scan(i)
         else:
             for i in full_scan_options:
-                scan_to_file(i, filebane)
+                scan_to_file(i, filename)
     
     display("The scan has been completed")
 
