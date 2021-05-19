@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from subprocess import check_output #used to get ips valid on machine
-import re #for regex when getting ip
-import os #for outputting command line commands - for setting up listener at the end
+import re # for regex when getting ip
+import os # for outputting command line commands
+import socket # for sending the scan file to another machine
 
-class Colour:                    #class of all the colours we may use
+class Colour: #class of all the colours we may use
     Black = "\u001b[30m"
     Red = "\u001b[31m"
     Green = "\u001b[32m"
@@ -132,15 +133,18 @@ def get_export():
             return get_save()
         return save
 
-def export():
+def export(scan_filename):
+    # get the ip address of the destination machine
     ask_for_ip = True
     while ask_for_ip == True:
         display("Enter the IP address of the machine that you want to send the file to")
         ip_address = input(f"({Colour.Text}IP Address Selection{Colour.Reset}) > ")
-        if re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", ip_address) != None # regex from https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address/106223#106223 and https://stackoverflow.com/questions/10086572/ip-address-validation-in-python-using-regex
+        if re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", ip_address) != None: # regex from https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address/106223#106223 and https://stackoverflow.com/questions/10086572/ip-address-validation-in-python-using-regex
             ask_for_ip = False # if the IP is in the correct format, then break out of the loop
         else:
             displayerror("IP address invalid, please try again!")
+    
+    # get the port number of the destination machine
     ask_for_port = True
     while ask_for_port == True:
         display("Enter the port on the machine that you want to send the file to")
@@ -149,12 +153,30 @@ def export():
         except ValueError:
             displayerror("Error, please enter an integer value")
         else:
-            if port >= 1 and port <= 65535
+            if port >= 1 and port <= 65535:
                 ask_for_port = False # if the port is in the correct range, then break out of the loop
             else:
                 displayerror("Port invalid, please try again!")
-
-
+    
+    # send the file to the destination machine
+    display("Press enter when you have set up a TCP listener on port " + str(port) + " on the destination machine")
+    input("For example: nc -l <port_number> >> <filename>")
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((ip_address, port))
+        try:
+            f = open(scan_filename, 'rb')
+            scan_text = f.read(1024)
+            while(scan_text):
+                client_socket.send(scan_text)
+                scan_text = f.read()
+            f.close()
+        except OSError:
+            displayerror("Error, scan file not found!")
+        client_socket.close()
+    except OSError:
+        displayerror("Error, connection failed!")
+        
 def title(name):
     os.system('echo ')
     #print(output)
@@ -472,10 +494,9 @@ def main():
 
     # If the scan was saved to a file, this asks the user if they want to send the file to another machine
     if save == 1:
-        if get_export() == 1:
+        while get_export() == 1:
             export(filename)
         
         
-
 if __name__=='__main__':
     main()
