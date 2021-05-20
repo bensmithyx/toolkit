@@ -86,7 +86,7 @@ def get_custom_options():
                 displayerror("Invalid option, try again")
              
 def get_save():
-    display("Would you like to save the scan to a file? (JSON format)")
+    display("Would you like to save the scan to a file?")
     options = ["No","Yes"]
     for i in range(2):
         print(f"{Colour.Colour4}{i} - {Colour.Colour2}{options[i]}{Colour.Reset}")
@@ -220,12 +220,12 @@ def scan(option_num):
         os.system('lscpu')
         os.system('echo && echo Printers:')
         os.system('lpstat -a 2>/dev/null')
-    elif option_num == 6: # Cron jobs belonging to the root user
-        title("ROOT CRON JOBS")    
-        os.system('')
-    elif option_num == 7: # Running processes belonging to the root user
-        title("ROOT PROCESSES")    
-        os.system('')
+    elif option_num == 6: # List of cron jobs
+        title("CRON JOB INFORMATION")    
+        os.system('crontab -l 2>/dev/null; ls -al /etc/cron* /etc/at* 2>/dev/null; cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"')
+    elif option_num == 7: # List of running processes
+        title("PROCESSES INFORMATION")    
+        os.system('ps aux 2>/dev/null')
     elif option_num == 8: # Check timers
         title("TIMERS")    
         os.system('systemctl list-timers --all | cat')
@@ -233,8 +233,8 @@ def scan(option_num):
         title("SOCKETS")    
         os.system('netstat -a -p --unix') #outputs alot of info
     elif option_num == 10: # D-BUS
-        title("D-BUS")    
-        os.system('')
+        title("D-BUS INFORMATION")    
+        os.system('busctl list 2>/dev/null')
     elif option_num == 11: # Network information
         title("NETWORK INFORMATION")
         os.system('echo IP addresses:')
@@ -275,9 +275,9 @@ def scan(option_num):
         os.system('if [ `which screen 2>/dev/null` ]; then (screen -ls); else echo "Screen not found"; fi')
         os.system('echo && echo Tmux:')
         os.system('if [ `which tmux 2>/dev/null` ]; then (tmux ls); else echo "Tmux not found"; fi')
-    elif option_num == 20: # Root owned files with SUID or SGID bits set
-        title("SUID AND SGID ROOT OWNED FILES")    
-        os.system('')
+    elif option_num == 20: # Files with SUID or SGID bits set
+        title("FILES WITH SUID AND SGID SET")    
+        os.system('find / -perm -4000 2>/dev/null')
     elif option_num == 21: # File permissions of sensitive files
         title("FILE PERMISSIONS FOR SENSITIVE FILES")    
         os.system('ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null')
@@ -294,7 +294,7 @@ def scan(option_num):
         os.system('echo $PATH 2>/dev/null')
     elif option_num == 24: # List of hidden files
         title("HIDDEN FILES")    
-        os.system('')
+        os.system('find / -type f -iname ".*" -ls 2>/dev/null')
     elif option_num == 25: # Log files
         title("LOG FILES")    
         os.system('')
@@ -309,7 +309,7 @@ def scan(option_num):
         os.system('')
     elif option_num == 29: # Unexpected ACL
         title("FILES WITH UNEXPECTED ACL")    
-        os.system('')
+        os.system('getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null')
 
 def title_in_file(name, filename):
     os.system('echo ')
@@ -355,11 +355,11 @@ def scan_to_file(option_num, filename):
         os.system('(echo && echo Printers:) >> %s' % (filename))
         os.system('(lpstat -a 2>/dev/null) >> %s' % (filename))
     elif option_num == 6: # Cron jobs belonging to the root user
-        title_in_file("ROOT CRON JOBS", filename) 
-        os.system('')
+        title_in_file("CRON JOB INFORMATION", filename) 
+        os.system('(crontab -l 2>/dev/null; ls -al /etc/cron* /etc/at* 2>/dev/null; cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#") >> %s' % (filename))
     elif option_num == 7: # Running processes belonging to the root user
-        title_in_file("ROOT PROCESSES", filename) 
-        os.system('')
+        title_in_file("PROCESSES INFORMATION", filename) 
+        os.system('(ps aux 2>/dev/null) >> %s' % (filename))
     elif option_num == 8: # Check timers
         title_in_file("TIMERS", filename) 
         os.system('(systemctl list-timers --all | cat) >> %s' % (filename))
@@ -368,7 +368,7 @@ def scan_to_file(option_num, filename):
         os.system('(netstat -a -p --unix) >> %s' % (filename)) #outputs alot of info
     elif option_num == 10: # D-BUS
         title_in_file("D-BUS", filename) 
-        os.system('')
+        os.system('(busctl list 2>/dev/null) >> %s' % (filename))
     elif option_num == 11: # Network information
         title_in_file("NETWORK INFORMATION", filename) 
         os.system('(echo IP addresses:) >> %s' % (filename))
@@ -407,8 +407,8 @@ def scan_to_file(option_num, filename):
         os.system('(echo && echo Tmux:) >> %s' % (filename))
         os.system('(if [ `which tmux 2>/dev/null` ]; then (tmux ls); else echo "Tmux not found"; fi) >> %s' % (filename))
     elif option_num == 20: # Root owned files with SUID or SGID bits set
-        title_in_file("SUID AND SGID ROOT OWNED FILES", filename) 
-        os.system('')
+        title_in_file("FILES WITH SUID AND SGID SET", filename) 
+        os.system('(find / -perm -4000 2>/dev/null) >> %s' % (filename))
     elif option_num == 21: # File permissions of sensitive files
         title_in_file("FILE PERMISSIONS FOR SENSITIVE FILES", filename) 
         os.system('(ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null) >> %s' % (filename))
@@ -425,7 +425,7 @@ def scan_to_file(option_num, filename):
         os.system('(echo $PATH 2>/dev/null) >> %s' % (filename))
     elif option_num == 24: # List of hidden files
         title_in_file("HIDDEN FILES", filename) 
-        os.system('')
+        os.system('(find / -type f -iname ".*" -ls 2>/dev/null) >> %s' % (filename))
     elif option_num == 25: # Log files
         title_in_file("LOG FILES", filename) 
         os.system('')
@@ -438,9 +438,9 @@ def scan_to_file(option_num, filename):
     elif option_num == 28: # Searching files that contain passwords
         title_in_file("FILES CONTAINING PASSWORDS", filename) 
         os.system('')
-    elif option_num == 29: # Unexpected ACL
-        title_in_file("FILES WITH UNEXPECTED ACL", filename) 
-        os.system('')
+    elif option_num == 29: # ACL
+        title_in_file("FILES WITH AN ACL", filename) 
+        os.system('(getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null) >> %s' % (filename))
 
 def main():
     scan_type = get_scan_type()
