@@ -315,15 +315,14 @@ def scan(option_num):
     elif option_num == 28: # Searching files that contain passwords
         title("FILES CONTAINING PASSWORDS")    
         os.system('''intpwdfiles=`timeout 150 grep -RiIE "(pwd|passwd|password|PASSWD|PASSWORD|dbuser|dbpass).*[=:].+|define ?\('(\w*passw|\w*user|\w*datab)" $HOMESEARCH /var/www /usr/local/www/ $backup_folders_row /tmp /etc /root /mnt /Users /private 2>/dev/null`; printf "%s\n" "$intpwdfiles" | grep -I ".php:"| sort | uniq | head -n 70; printf "%s\n" "$intpwdfiles" | grep -vI ".php:" | grep -E "^/" | grep ":"| sort | uniq | head -n 70''')
-    elif option_num == 29: # Unexpected ACL
-        title("FILES WITH UNEXPECTED ACL")    
+    elif option_num == 29: # ACL
+        title("FILES WITH AN ACL")    
         os.system('getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null')
 
 def title_in_file(name, filename):
-    os.system('echo ')
-    #print(output)
+    os.system('echo >> %s' % (filename))
     os.system('(%s %s %s) >> %s' % ("echo '########## ", str(name), " ##########'", filename))
-    os.system('echo ')
+    os.system('echo >> %s' % (filename))
 
 def scan_to_file(option_num, filename):
     if option_num == 0: # OS information
@@ -375,7 +374,7 @@ def scan_to_file(option_num, filename):
         title_in_file("SOCKETS", filename) 
         os.system('(netstat -a -p --unix) >> %s' % (filename)) #outputs alot of info
     elif option_num == 10: # D-BUS
-        title_in_file("D-BUS", filename) 
+        title_in_file("D-BUS INFORMATION", filename) 
         os.system('(busctl list 2>/dev/null) >> %s' % (filename))
     elif option_num == 11: # Network information
         title_in_file("NETWORK INFORMATION", filename) 
@@ -420,9 +419,11 @@ def scan_to_file(option_num, filename):
         os.system('(if [ `which screen 2>/dev/null` ]; then (screen -ls); else echo "Screen not found"; fi) >> %s' % (filename))
         os.system('(echo && echo Tmux:) >> %s' % (filename))
         os.system('(if [ `which tmux 2>/dev/null` ]; then (tmux ls); else echo "Tmux not found"; fi) >> %s' % (filename))
-    elif option_num == 20: # Root owned files with SUID or SGID bits set
-        title_in_file("FILES WITH SUID AND SGID SET", filename) 
+    elif option_num == 20: # Root owned files with SUID or SGID bits set       
+        title_in_file("FILES WITH SUID SET", filename)    
         os.system('(find / -perm -4000 2>/dev/null) >> %s' % (filename))
+        title_in_file("FILES WITH SGID SET", filename) 
+        os.system('(find / -perm -2000 2>/dev/null) >> %s' % (filename))
     elif option_num == 21: # File permissions of sensitive files
         title_in_file("FILE PERMISSIONS FOR SENSITIVE FILES", filename) 
         os.system('(ls -l /etc/passwd 2>/dev/null; ls -l /etc/shadow 2>/dev/null) >> %s' % (filename))
