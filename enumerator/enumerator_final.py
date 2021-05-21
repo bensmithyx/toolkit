@@ -302,7 +302,7 @@ def scan(option_num):
         os.system('find / -type f -iname ".*" -ls 2>/dev/null')
     elif option_num == 25: # Log files
         title("LOG FILES")    
-        os.system('''if [ `which aureport 2>/dev/null` ]; then (aureport --tty 2>/dev/null | grep -E "su |sudo "; grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null); else echo "To view log file information, please install 'aureport'"''')
+        os.system('''if [ `which aureport 2>/dev/null` ]; then (aureport --tty 2>/dev/null | grep -E "su |sudo "; grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null); else echo "To view log file information, please install 'aureport'"; fi''')
     elif option_num == 26: # List of writeable files
         title("WRITEABLE FILES")
         # finds files owned by the user or that  are world writeable
@@ -442,7 +442,7 @@ def scan_to_file(option_num, filename):
         os.system('(find / -type f -iname ".*" -ls 2>/dev/null) >> %s' % (filename))
     elif option_num == 25: # Log files
         title_in_file("LOG FILES", filename) 
-        os.system('''(if [ `which aureport 2>/dev/null` ]; then (aureport --tty 2>/dev/null | grep -E "su |sudo "; grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null); else echo "To view log file information, please install 'aureport'") >> %s''' % (filename))
+        os.system('''(if [ `which aureport 2>/dev/null` ]; then (aureport --tty 2>/dev/null | grep -E "su |sudo "; grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null); else echo "To view log file information, please install 'aureport'"; fi) >> %s''' % (filename))
     elif option_num == 26: # List of writeable files
         title_in_file("WRITEABLE FILES", filename)
         # finds files owned by the user or that  are world writeable
@@ -454,7 +454,7 @@ def scan_to_file(option_num, filename):
         os.system('(find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null) >> %s' % (filename))
     elif option_num == 28: # Searching files that contain passwords
         title_in_file("FILES CONTAINING PASSWORDS", filename) 
-        os.system('''(intpwdfiles=`timeout 150 grep -RiIE "(pwd|passwd|password|PASSWD|PASSWORD|dbuser|dbpass).*[=:].+|define ?\('(\w*passw|\w*user|\w*datab)" $HOMESEARCH /var/www /usr/local/www/ $backup_folders_row /tmp /etc /root /mnt /Users /private 2>/dev/null`; printf "%s\n" "$intpwdfiles" | grep -I ".php:"| sort | uniq | head -n 70; printf "%s\n" "$intpwdfiles" | grep -vI ".php:" | grep -E "^/" | grep ":"| sort | uniq | head -n 70) >> %s''' % (filename))
+        os.system(f'''(intpwdfiles=`timeout 150 grep -RiIE "(pwd|passwd|password|PASSWD|PASSWORD|dbuser|dbpass).*[=:].+|define ?\('(\w*passw|\w*user|\w*datab)" $HOMESEARCH /var/www /usr/local/www/ $backup_folders_row /tmp /etc /root /mnt /Users /private 2>/dev/null`; printf "%s\n" "$intpwdfiles" | grep -I ".php:"| sort | uniq | head -n 70; printf "%s\n" "$intpwdfiles" | grep -vI ".php:" | grep -E "^/" | grep ":"| sort | uniq | head -n 70) >> {filename}''')
     elif option_num == 29: # ACL
         title_in_file("FILES WITH AN ACL", filename) 
         os.system('(getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null) >> %s' % (filename))
