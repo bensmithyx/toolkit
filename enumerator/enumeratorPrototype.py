@@ -50,7 +50,7 @@ def get_save():
         return get_scan_type()
     else:
         if save != 0 and save != 1:
-            print("ERROR: PLEASE NETER A VALID OPTION")
+            print("ERROR: PLEASE ENTER A VALID OPTION")
             return get_scan_type()
         else:
             return save
