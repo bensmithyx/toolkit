@@ -126,11 +126,11 @@ def get_export():
         save = int(input(f"({Colour.Text}Export Selection{Colour.Reset}) > "))
     except ValueError:
         displayerror("Error, please enter an integer value")
-        return get_save()
+        return get_export()
     else:
         if save not in range(2):
             displayerror("Option entered not in correct range, try again")
-            return get_save()
+            return get_export()
         return save
 
 def export(scan_filename):
