@@ -112,16 +112,16 @@ Process information
 
 |             Scan Modules             | Light Scan | Medium Scan | Full Scan |
 |:------------------------------------:|:----------:|:-----------:|:---------:|
-|                OS Info               |     - [x]    |     - [x]     |    - [x]    |
-|             SUDO Version             |     [x]    |     [x]     |    [x]    |
-|       Environment Variable Info      |     [x]    |     [x]     |    [x]    |
-|        Defensive Measures Info       |            |     [x]     |    [x]    |
-|              DMesg Info              |     [x]    |     [x]     |    [x]    |
-|              Device Info             |            |     [x]     |    [x]    |
-|             Cron Job Info            |            |     [x]     |    [x]    |
-|        Running Processes Info        |            |     [x]     |    [x]    |
-|              Timers Info             |            |             |    [x]    |
-|              Socket Info             |            |     [x]     |    [x]    |
+|                OS Info               |     [✓]    |     [✓]     |    [✓]    |
+|             SUDO Version             |     [✓]    |     [✓]     |    [✓]    |
+|       Environment Variable Info      |     [✓]    |     [✓]     |    [✓]    |
+|        Defensive Measures Info       |            |     [✓]     |    [✓]    |
+|              DMesg Info              |     [x]    |     [x]     |    [✓]    |
+|              Device Info             |            |     [x]     |    [✓]    |
+|             Cron Job Info            |            |     [x]     |    [✓]    |
+|        Running Processes Info        |            |     [x]     |    [✓]    |
+|              Timers Info             |            |             |    [✓]    |
+|              Socket Info             |            |     [x]     |    [✓]    |
 |              D-BUS Info              |            |     [x]     |    [x]    |
 |             Network Info             |            |     [x]     |    [x]    |
 |         Info on Current User         |     [x]    |     [x]     |    [x]    |
