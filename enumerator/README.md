@@ -112,7 +112,7 @@ Process information
 
 |             Scan Modules             | Light Scan | Medium Scan | Full Scan |
 |:------------------------------------:|:----------:|:-----------:|:---------:|
-|                OS Info               |     [x]    |     [x]     |    [x]    |
+|                OS Info               |     - [x]    |     - [x]     |    - [x]    |
 |             SUDO Version             |     [x]    |     [x]     |    [x]    |
 |       Environment Variable Info      |     [x]    |     [x]     |    [x]    |
 |        Defensive Measures Info       |            |     [x]     |    [x]    |
