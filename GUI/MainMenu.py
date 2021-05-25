@@ -86,8 +86,8 @@ class BaseFrame(Frame):
     	self.pack()
     
     def nwa_btn_pressed(self):
-    	root.destroy()
-    	import NWA
+        root.destroy()
+        import NWA
     	
     def pm_btn_pressed(self):
     	root.destroy()
