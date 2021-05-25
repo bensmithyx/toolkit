@@ -1,0 +1,21 @@
+localhost-top-1000-ports.scan
+PORT    STATUS    SERVICE
+
+22      open      ssh
+------------------------------
+631     open      ipp
+------------------------------
+8000    open      Unknown
+------------------------------
+49154   open      Unknown
+------------------------------
+Scantime - 0:00:00.050194
+localhost-common.txt.dirb
+http://localhost:8000/.bash_history            200
+http://localhost:8000/.bashrc                  200
+http://localhost:8000/.cache                   200
+http://localhost:8000/.config                  200
+http://localhost:8000/.profile                 200
+http://localhost:8000/.ssh                     200
+http://localhost:8000/Downloads                200
+http://localhost:8000/Music                    200
