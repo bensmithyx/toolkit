@@ -637,9 +637,9 @@ class BaseFrame(Frame):
             if valid_for_export == True:
                 try:
                     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    client_socket.connect((ip_address, port))
+                    client_socket.connect((userip, int(port)))
                     try:
-                        f = open(scan_filename, 'rb')
+                        f = open(filename, 'rb')
                         scan_text = f.read(1024)
                         while(scan_text):
                             client_socket.send(scan_text)
@@ -686,4 +686,3 @@ root.title("CTF Toolkit")
 root.iconphoto(False, PhotoImage(file="Icon.png"))
 root.resizable(False, False)
 root.mainloop()
-
