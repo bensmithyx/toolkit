@@ -91,8 +91,8 @@ class BaseFrame(Frame):
     	self.main.configure(background= '#12263A')
     	self.footer.configure(background='#12263A')
 
-    	#sys.stdout = TextRedirector(self.scanoutput, "stdout")
-    	#sys.stderr = TextRedirector(self.scanoutput, "stderr")
+    	sys.stdout = TextRedirector(self.scanoutput, "stdout")
+    	sys.stderr = TextRedirector(self.scanoutput, "stderr")
 
     	self.pack()
 
@@ -264,14 +264,6 @@ class BaseFrame(Frame):
                     for port, status, service in zip(self.scans[-1].ports,self.scans[-1].statuses,self.scans[-1].services):
                         file.write(f"\n{port}{' '*(8-len(str(port)))}{status}{' '*(10-len(str(status)))}{service}\n{30*'-'}")
                     file.write(f"\nScantime - {self.scans[-1].time}")
-
-                    file.write(f"\n{self.dirbslist[choice].host}-{wordlist}.dirb")
-                    for c in range(0, len(self.scans[-1].ports)):
-                        if int(self.scans[-1].ports[c]) == 80 or int(self.scans[-1].ports[c]) == 8000 or int(self.scans[-1].ports[c]) == 8080 or int(self.scans[-1].ports[c]) == 443:
-                            choice = c
-                            for directory in self.dirbslist[-1].files:
-                                print(directory)
-                                file.write(f"\n{directory}")
                     file.close()
             else:
                 print("Please scan a host first")
@@ -281,7 +273,7 @@ class BaseFrame(Frame):
             messagebox.showerror(title="ERROR!!!", message="The IP Address " + str(userip) + " is not Valid!")
 
     def back_btn_pressed(self):
-    	root.destroy() ; print("here")
+    	root.destroy()
     	import MainMenu
 
 class TextRedirector(object):
