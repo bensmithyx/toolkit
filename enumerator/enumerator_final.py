@@ -106,6 +106,11 @@ def get_filename():
     while valid_filename == False:
         display("Enter the name you want to save the file as")
         name = input(f"({Colour.Text}Filename Selection{Colour.Reset}) > ") + ".txt"
+        
+        if " " in name:
+            displayerror("Filename cannot have a space character in it, please try a different one")
+            return get_filename()
+        
         try:
             f = open(name,"x")
         except FileExistsError:
