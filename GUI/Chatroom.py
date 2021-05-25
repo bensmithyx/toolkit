@@ -800,7 +800,7 @@ class BaseFrame(Frame):
                     wait = (int(self.userid) + 1)
 
 
-root = Tk()
+root = Toplevel()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
 root.option_add("*TCombobox*Listbox*Font", 'Raleway 17')
@@ -816,4 +816,3 @@ root.iconphoto(False, PhotoImage(file=BaseFrame.icon))
 root.title("CTF Chatroom")
 root.resizable(False, False)
 root.mainloop()
-

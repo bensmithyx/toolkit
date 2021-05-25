@@ -107,8 +107,8 @@ def get_filename():
         display("Enter the name you want to save the file as")
         name = input(f"({Colour.Text}Filename Selection{Colour.Reset}) > ") + ".txt"
         
-        if " " in name:
-            displayerror("Filename cannot have a space character in it, please try a different one")
+        if len(re.findall("[A-Za-z0-9_.]", name)) != len(name):
+            displayerror("Filename is not valid, please try a different filename")
             return get_filename()
         
         try:

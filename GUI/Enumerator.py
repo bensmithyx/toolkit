@@ -5,6 +5,7 @@ from PIL import ImageTk, Image
 from subprocess import check_output
 import subprocess as sp
 import re, os, threading
+import socket # for sending the scan file to another machine
 
 class BaseFrame(Frame):
     def __init__(self, master):
@@ -493,38 +494,46 @@ class BaseFrame(Frame):
         port = self.Portentry.get()
         userip = self.IPentry.get()
         valid_filename = False
+        valid_for_export = False
         valid = False
 
         ip = self.checkIP(userip)
         if ip != 0:
             if str(port) == "":
                 if filename != "":
-                    try:
-                        f = open(filename,"x")
-                    except FileExistsError:
-                        messagebox.showerror(title="ERROR!!!", message="File Already Exists. Please Choose a Valid Filename!")
-                    except:
+                    if len(re.findall("[A-Za-z0-9_.]", filename)) != len(filename):
                         messagebox.showerror(title="ERROR!!!", message="Please Choose a Valid Filename!")
                     else:
-                        f.close()
-                        valid_filename = True
-                        valid = True
+                        try:
+                            f = open(filename,"x")
+                        except FileExistsError:
+                            messagebox.showerror(title="ERROR!!!", message="File Already Exists. Please Choose a Valid Filename!")
+                        except:
+                            messagebox.showerror(title="ERROR!!!", message="Please Choose a Valid Filename!")
+                        else:
+                            f.close()
+                            valid_filename = True
+                            valid = True
                 else:
                     valid = True
             else:
                 try:   
                     if int(port) in range(65536): 
                         if filename != "":
-                            try:
-                                f = open(filename,"x")
-                            except FileExistsError:
-                                messagebox.showerror(title="ERROR!!!", message="File Already Exists. Please Choose a Valid Filename!")
-                            except:
+                            if len(re.findall("[A-Za-z0-9_.]", filename)) != len(filename):
                                 messagebox.showerror(title="ERROR!!!", message="Please Choose a Valid Filename!")
                             else:
-                                f.close()
-                                valid_filename = True
-                                valid = True
+                                try:
+                                    f = open(filename,"x")
+                                except FileExistsError:
+                                    messagebox.showerror(title="ERROR!!!", message="File Already Exists. Please Choose a Valid Filename!")
+                                except:
+                                    messagebox.showerror(title="ERROR!!!", message="Please Choose a Valid Filename!")
+                                else:
+                                    f.close()
+                                    valid_filename = True
+                                    valid_for_export = True
+                                    valid = True
                         else:
                             valid = True
                     else:
@@ -624,6 +633,23 @@ class BaseFrame(Frame):
 
             else:
                 messagebox.showerror(title="ERROR!!!", message="Please Chose a Valid Type of Scan!")
+                
+            if valid_for_export == True:
+                try:
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    client_socket.connect((ip_address, port))
+                    try:
+                        f = open(scan_filename, 'rb')
+                        scan_text = f.read(1024)
+                        while(scan_text):
+                            client_socket.send(scan_text)
+                            scan_text = f.read()
+                        f.close()
+                    except OSError:
+                        messagebox.showerror(title="ERROR!!!", message="Scan File Not Found!")
+                    client_socket.close()
+                except OSError:
+                    messagebox.showerror(title="ERROR!!!", message="Connection Failed!!")
     	
     def back_btn_pressed(self):
     	root.destroy()
