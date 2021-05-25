@@ -643,7 +643,7 @@ class BaseFrame(Frame):
                         scan_text = f.read(1024)
                         while(scan_text):
                             client_socket.send(scan_text)
-                            scan_text = f.read()
+                            scan_text = f.read(1024)
                         f.close()
                     except OSError:
                         messagebox.showerror(title="ERROR!!!", message="Scan File Not Found!")
