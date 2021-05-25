@@ -110,7 +110,9 @@ def getinput(option,range):
     while True:
         try:
             choice = int(input(f"({Colour.text}{option}{Colour.Reset}) > "))
-            if 0 < choice <= range:
+            if range == 0:
+                return 1
+            elif 0 < choice <= range:
                 return choice
             else:
                 display("Invalid Option")
@@ -293,6 +295,7 @@ def main(argv):
                             print(f"{index} - {dirbscan.host}")
                         print(f"{len(dirbslist)+1} - Exit\n")
                         choice = getinput("scans",len(dirbslist))
+                        print(len(dirbslist)+1)
                         if choice == len(dirbslist)+1:
                             display("Exited")
                         else:

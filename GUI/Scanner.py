@@ -22,42 +22,42 @@ class Scan:
 class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
-    	
+
     	self.header = Frame(self, width = 1024, height = 100)
     	self.main = Frame(self, width = 1024, height = 450)
     	self.footer = Frame(self, width = 1024, height = 50)
-    	
+
     	self.header.grid(row=0, column=0, sticky=N+E)
     	self.header.grid_propagate(False)
     	self.main.grid(row=1, column=0, sticky=N+E)
     	self.main.grid_propagate(False)
     	self.footer.grid(row=2, column=0, sticky=N+E)
     	self.footer.grid_propagate(False)
-    	
+
     	self.titlelogo = Canvas(self.header, width = 100, height = 100, highlightthickness = 0)
     	self.titlelogo.grid(row=0, column=0, sticky=W)
-    	
+
     	self.img1 = ImageTk.PhotoImage(Image.open("Logo.png"))
     	self.titlelogo.create_image(1,1,anchor = N+W, image = self.img1)
-    	
+
     	self.title = Label(self.header, text="CTF MultiTool", fg="#63CCCA", bg="#12263A", font="Raleway 48 bold", pady="10", padx = "20")
     	self.title.grid(row=0, column=1, sticky=N)
-    	
+
     	self.IPtitle = Label(self.main, text="Destination IP:", fg="#63CCCA", bg="#12263A", font="Raleway 24", pady="10", padx = "20")
-    	
+
     	self.filetitle = Label(self.main, text="Filename:", fg="#63CCCA", bg="#12263A", font="Raleway 24", pady="10", padx = "20")
-    	
+
     	self.IPtitle.grid(row = 0, column = 0)
     	self.filetitle.grid(row = 0, column = 1)
-    	
+
     	self.IPentrybg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="10", padx = "20")
     	self.fileentrybg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="10", padx = "20")
     	self.scanbuttonbg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="10", padx = "20")
-    	
+
     	self.IPentrybg.grid(row = 1, column = 0)
     	self.fileentrybg.grid(row = 1, column = 1)
     	self.scanbuttonbg.grid(row = 1, column = 2, columnspan = 2)
-    	
+
     	self.scanoutput = Text(self.main, bg="#12263A", fg='#63CCCA', width = 72, height = 10, borderwidth = 1, relief = SUNKEN, font="Raleway 14")
     	self.scanoutput.grid(row = 2, column = 0, columnspan = 3)
     	self.scanoutput.config(state = DISABLED)
@@ -73,27 +73,27 @@ class BaseFrame(Frame):
     	self.z = StringVar()
     	self.fileentry= ttk.Entry(self.fileentrybg, textvariable = self.z, font="Raleway 24", width = 12)
     	self.fileentry.grid(row = 0, column = 0)
-    	
+
     	self.scanbutton = ttk.Button(self.scanbuttonbg, text = "Scan", width = 6, command = self.scan_btn_pressed)
     	self.scanbutton.grid(row = 0, column = 0)
-    	
+
     	self.backbuttonbg = Frame(self.footer, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="0", padx = "10")
     	self.backbuttonbg.grid(row = 0, column = 0, sticky = N+W)
-    	
+
     	self.backbutton = ttk.Button(self.backbuttonbg, text = "Back", width = 6, command = self.back_btn_pressed)
     	self.backbutton.grid(row = 0, column = 0)
-    	
+
     	self.terms = Label(self.footer, text="The company does not take responsibility for any misue of this product.", fg="#63CCCA", bg="#12263A", font="Raleway 16", pady="10")
     	self.terms.grid(row=0, column=1, sticky=N)
-    	
+
     	self.header.configure(background='#12263A')
     	self.titlelogo.configure(background='#12263A')
     	self.main.configure(background= '#12263A')
     	self.footer.configure(background='#12263A')
-    	
+
     	#sys.stdout = TextRedirector(self.scanoutput, "stdout")
     	#sys.stderr = TextRedirector(self.scanoutput, "stderr")
-    	
+
     	self.pack()
 
     valid_hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
@@ -215,7 +215,7 @@ class BaseFrame(Frame):
                     self.requestweb(type, ip, port, words, word)
         # Clearing last output
         self.dirbslist.append(Dirb(files,ip))
-    	
+
     def scan_btn_pressed(self):
         filename = self.fileentry.get()
         userip = self.IPentry.get()
@@ -255,8 +255,8 @@ class BaseFrame(Frame):
                                 print(exception)
                                 print("Port not scannable")
                         print("Scan Complete")
-                                
-                            
+
+
                 if filename != "":
                     file = open(filename + ".scan","w")
                     file.write(f"{self.scans[-1].host}-{portrange}.scan")
@@ -279,9 +279,9 @@ class BaseFrame(Frame):
 
         else:
             messagebox.showerror(title="ERROR!!!", message="The IP Address " + str(userip) + " is not Valid!")
-    	
+
     def back_btn_pressed(self):
-    	root.destroy()
+    	root.destroy() ; print("here")
     	import MainMenu
 
 class TextRedirector(object):
@@ -293,7 +293,7 @@ class TextRedirector(object):
         self.widget.configure(state="normal")
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
-    
+
 
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
@@ -311,4 +311,3 @@ root.title("CTF Toolkit")
 root.iconphoto(False, PhotoImage(file="Icon.png"))
 root.resizable(False, False)
 root.mainloop()
-
