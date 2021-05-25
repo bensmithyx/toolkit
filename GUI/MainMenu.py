@@ -75,7 +75,7 @@ class BaseFrame(Frame):
     	#os.system('xterm -into %d -geometry 165x27 -sb & ' % wid)
     	os.system('xterm -into %d -geometry 165x27 -sb & ' % wid)
     	
-    	self.terms = Label(self.footer, text="The company do not take responsibility for any misue of this product.", fg="#63CCCA", bg="#12263A", font="Raleway 16", pady="10")
+    	self.terms = Label(self.footer, text="The company does not take responsibility for any misue of this product.", fg="#63CCCA", bg="#12263A", font="Raleway 16", pady="10")
     	self.terms.grid(row=0, column=1, sticky=N)
     	
     	self.header.configure(background='#12263A')
