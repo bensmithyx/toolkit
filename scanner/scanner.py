@@ -292,7 +292,7 @@ def main(argv):
                         for index, dirbscan in enumerate(dirbslist,1):
                             print(f"{index} - {dirbscan.host}")
                         print(f"{len(dirbslist)+1} - Exit\n")
-                        choice = getinput("scans",len(dirbslist)+1)
+                        choice = getinput("scans",len(dirbslist))
                         if choice == len(dirbslist)+1:
                             display("Exited")
                         else:
