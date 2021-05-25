@@ -27,7 +27,7 @@ def display(text): #display in a format similar to other tools for prompt text
 def displayerror(text): #display in similar format to display(text) but with x instead of + for an error
     print(f"\n{Colour.Blue}[{Colour.Black}x{Colour.Blue}]{Colour.Text} {text}{Colour.Reset}\n")
 
-def get_scan_type():
+def get_scan_type(): # gets the type of scan that the user wants to carry out, ie: light, medium, full or custom
     display("Which type of scan would you like to carry out?")
     scans = ["Custom scan","Light scan","Medium scan","Full scan"]
     for i in range(4):
@@ -43,7 +43,7 @@ def get_scan_type():
             return get_scan_type()
         return scan
 
-def get_custom_options():
+def get_custom_options(): # If the user chose to do a custom scan, this finds out what scan modules they want as part of their scan
     options = []
     
     enter_options_again = True
@@ -85,7 +85,7 @@ def get_custom_options():
             else:
                 displayerror("Invalid option, try again")
              
-def get_save():
+def get_save(): # Asks the user if thay want to save their scan to a file, or just have it output to the terminal
     display("Would you like to save the scan to a file?")
     options = ["No","Yes"]
     for i in range(2):
@@ -101,16 +101,18 @@ def get_save():
             return get_save()
         return save
 
-def get_filename():
+def get_filename(): # If the user wanted to save their scan to a file, this asks the user what filename they want to use for it
     valid_filename = False
     while valid_filename == False:
         display("Enter the name you want to save the file as")
         name = input(f"({Colour.Text}Filename Selection{Colour.Reset}) > ") + ".txt"
         
+        # This ensures that the filename contains only alphanumeric characters, underscores and fullstops, as characters such as "|" and ";" can mess with the Linux commands when the filename variable is inserted into them
         if len(re.findall("[A-Za-z0-9_.]", name)) != len(name):
             displayerror("Filename is not valid, please try a different filename")
             return get_filename()
         
+        # This ensures that the filename is not already taken by another file, and that it is not going to crash the program
         try:
             f = open(name,"x")
         except FileExistsError:
@@ -122,7 +124,7 @@ def get_filename():
             valid_filename = True
     return name
 
-def get_export():
+def get_export(): # This asks the user (after the scan is completed) if they want to send their completed scan file to another machine
     display("Would you like to send the file to another machine?")
     options = ["No","Yes"]
     for i in range(2):
@@ -138,14 +140,14 @@ def get_export():
             return get_export()
         return save
 
-def export(scan_filename):
-    # get the ip address of the destination machine
+def export(scan_filename): # This gets the IP address and TCP port on the machine that the user wants to send their file to
+    # get the ip address of the destination machine and checks that it is a valid IPv4 address by using regular expression
     ask_for_ip = True
     while ask_for_ip == True:
         display("Enter the IP address of the machine that you want to send the file to")
         ip_address = input(f"({Colour.Text}IP Address Selection{Colour.Reset}) > ")
-        if re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", ip_address) != None: # regex from https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address/106223#106223 and https://stackoverflow.com/questions/10086572/ip-address-validation-in-python-using-regex
-            ask_for_ip = False # if the IP is in the correct format, then break out of the loop
+        if re.match("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$", ip_address) != None:
+            ask_for_ip = False # if the IP is in the correct format, then break out of the loop and move on to asking for a port number
         else:
             displayerror("IP address invalid, please try again!")
     
@@ -159,7 +161,7 @@ def export(scan_filename):
             displayerror("Error, please enter an integer value")
         else:
             if port >= 1 and port <= 65535:
-                ask_for_port = False # if the port is in the correct range, then break out of the loop
+                ask_for_port = False # if the port is in the correct range, then break out of the loop and prepare to send the file
             else:
                 displayerror("Port invalid, please try again!")
     
@@ -167,28 +169,27 @@ def export(scan_filename):
     display("Press enter when you have set up a TCP listener on port " + str(port) + " on the destination machine")
     input(f"{Colour.Colour2}For example: nc -l <PORT_NUMBER> >> <FILENAME>{Colour.Reset}")
     try:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((ip_address, port))
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # setting up client_socket as using IPv4 and TCP (AF_INET means IPv4 and SOCK_STREAM means TCP)
+        client_socket.connect((ip_address, port)) # creates a connection to the machine with IP address of 'ip_address' on port 'port'
         try:
-            f = open(scan_filename, 'rb')
-            scan_text = f.read(1024)
+            f = open(scan_filename, 'rb') # open the scan file in binary read mode 
+            scan_text = f.read(1024) # read 1024 bytes and store them in scan_text
             while(scan_text):
-                client_socket.send(scan_text)
-                scan_text = f.read()
+                client_socket.send(scan_text) # send these bytes to the destination machine
+                scan_text = f.read(1024) # read another 1024 bytes - if the file has not been fully read yet, then loop again
             f.close()
         except OSError:
-            displayerror("Error, scan file not found!")
+            displayerror("Error, scan file not found!") # if opening the scan file caused an error, tell the user that it can't be found
         client_socket.close()
     except OSError:
-        displayerror("Error, connection failed!")
+        displayerror("Error, connection failed!") # if the connection to teh destination machine failed, tell the user
         
-def title(name):
+def title(name): # format the title of the scan module nicely when it is being output
     os.system('echo ')
-    #print(output)
     os.system('%s %s %s' % ("echo '########## ", str(name), " ##########'"))
     os.system('echo ')
 
-def scan(option_num):
+def scan(option_num): # contains all the scan modules - it takes a number as its argument and runs the scan module that corresponds to that number
     if option_num == 0: # OS information
         title("OS SYSTEM INFORMATION")
         os.system('(cat /proc/version || uname -a ) 2>/dev/null; lsb_release -a 2>/dev/null')
@@ -324,12 +325,12 @@ def scan(option_num):
         title("FILES WITH AN ACL")    
         os.system('getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null')
 
-def title_in_file(name, filename):
+def title_in_file(name, filename): # same as title(), but it puts it in a file instead of on the console
     os.system('echo >> %s' % (filename))
     os.system('(%s %s %s) >> %s' % ("echo '########## ", str(name), " ##########'", filename))
     os.system('echo >> %s' % (filename))
 
-def scan_to_file(option_num, filename):
+def scan_to_file(option_num, filename): # same as scan(), but it puts the result of the command in a file instead of on the console
     if option_num == 0: # OS information
         title_in_file("OS SYSTEM INFORMATION", filename)
         os.system('((cat /proc/version || uname -a ) 2>/dev/null; lsb_release -a 2>/dev/null) >> %s' % (filename))
@@ -466,9 +467,9 @@ def scan_to_file(option_num, filename):
         os.system('(getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null) >> %s' % (filename))
 
 def main():
-    scan_type = get_scan_type()
-    scan_options = []
-    if scan_type == 0: #if it is a custom scan
+    scan_type = get_scan_type() # ask the user what type of scan they want
+    scan_options = [] # this list will contain all of the ID numbers of the scan modules that will be run in the scan that the user chooses
+    if scan_type == 0: # if it is a custom scan, then ask the user what scan modules they want in their scan
     	scan_options = get_custom_options()
     	
     # This asks the user if they want to save the results of their scan to a file, and if they do, it asks the user what name they want to give to the file
@@ -477,36 +478,36 @@ def main():
     if save == 1:
         filename = get_filename()
     
-    if scan_type == 0:
+    if scan_type == 0: # if the user chose a custom scan:
         display("Custom scan commencing...")
-        if save == 0:
+        if save == 0: # if the user didn't choose to save the scan to a file:
             for i in scan_options:
     	        scan(i)
         else:
             for i in scan_options:
                 scan_to_file(i, filename)
-    elif scan_type == 1:
+    elif scan_type == 1: # if the user chose a light scan:
         display("Light scan commencing...")
         light_scan_options = [0,1,2,4,12,13,14,18,21,23]
-        if save == 0:
+        if save == 0: # if the user didn't choose to save the scan to a file:
             for i in light_scan_options:
                 scan(i)
         else:
             for i in light_scan_options:
                 scan_to_file(i, filename)
-    elif scan_type == 2:
+    elif scan_type == 2: # if the user chose a medium scan:
         display("Medium scan commencing...")
         medium_scan_options = [0,1,2,3,4,5,6,7,9,10,11,12,13,14,15,18,19,20,21,22,23,24,25,26]
-        if save == 0:
+        if save == 0: # if the user didn't choose to save the scan to a file:
             for i in medium_scan_options:
                 scan(i)
         else:
             for i in medium_scan_options:
                 scan_to_file(i, filename)
-    else:
+    else: # if the user chose a full scan:
         display("Full scan commencing...")
         full_scan_options = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
-        if save == 0:
+        if save == 0: # if the user didn't choose to save the scan to a file:
             for i in full_scan_options:
                 scan(i)
         else:
@@ -517,7 +518,7 @@ def main():
 
     # If the scan was saved to a file, this asks the user if they want to send the file to another machine
     if save == 1:
-        while get_export() == 1:
+        while get_export() == 1: # after every time the file is sent to another machine, keep asking the user if they want to send it to another one until they say they don't
             export(filename)
         
         
