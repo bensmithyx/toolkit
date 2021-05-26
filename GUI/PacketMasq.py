@@ -6,7 +6,7 @@ from scapy.all import *
 import sys
 from PIL import ImageTk, Image
 
-class TextRedirector(object):
+class TextRedirector(object): #Text redirector redirecting anything from stdout to the tkinter text box for GUI output
 	def __init__(self, widget, tag="stdout"):
 		self.widget = widget
 		self.tag = tag
@@ -16,7 +16,7 @@ class TextRedirector(object):
 		self.widget.insert("end", str, (self.tag,))
 		self.widget.configure(state="disabled")
 
-class BaseFrame(Frame):
+class BaseFrame(Frame): # setting up base frame for our tkinter window
 	def __init__(self, master):
 		super().__init__(master)
 		
@@ -29,7 +29,7 @@ class BaseFrame(Frame):
 		self.main.grid(row=1, column=0, sticky=N+E)
 		self.main.grid_propagate(False)
 		self.footer.grid(row=2, column=0, sticky=N+E)
-		self.footer.grid_propagate(False)
+		self.footer.grid_propagate(False)                              # setting up layout and buttons etc V
 		
 		self.titlelogo = Canvas(self.header, width = 100, height = 100, highlightthickness = 0)
 		self.titlelogo.grid(row=0, column=0, sticky=W)
@@ -141,11 +141,11 @@ class BaseFrame(Frame):
 		self.footer.configure(background='#12263A')
 		self.valid_hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 		self.valid_dec = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-		sys.stdout = TextRedirector(self.packetoutput,"stdout")
+		sys.stdout = TextRedirector(self.packetoutput,"stdout") # takes any stdout or stderr and redirects it to the GUI
 		sys.stdout = TextRedirector(self.packetoutput,"stderr")
 		self.pack()
 	
-	def checkMac(self,mac):
+	def checkMac(self,mac): # Checks for valid mac address entered
 		if len(mac) == 17:
 			for x in range(0, len(mac)-1):
 				if x == 2 or x == 5 or x == 8 or x == 11 or x == 14:
@@ -158,7 +158,7 @@ class BaseFrame(Frame):
 		else:
 			return 0
 
-	def checkIP(self,ip):
+	def checkIP(self,ip): # checks for valid ip address entered.
 		if ip == '':
 			return 0
 		ip = ip.split(".")
@@ -180,7 +180,7 @@ class BaseFrame(Frame):
 		else:
 			return 0
 
-	def checkPort(self,port):
+	def checkPort(self,port): # checks for valid port entered within a range.
 		if port == '':
 			return 0
 		for x in port:
@@ -193,7 +193,7 @@ class BaseFrame(Frame):
 		else:
 			return 0
 
-	def checkID(self,id):
+	def checkID(self,id): # checks for a valid ID entered for packet id.
 		if id == '':
 			return 0
 		for x in id:
@@ -206,7 +206,7 @@ class BaseFrame(Frame):
 		else:
 			return 0
 
-	def checkTime(self,time):
+	def checkTime(self,time): # checks for a valid time entered for TTL.
 		if time == '':
 			return 0
 		for x in time:
@@ -219,7 +219,7 @@ class BaseFrame(Frame):
 		else:
 			return 0
 
-	def checkCount(self,count):
+	def checkCount(self,count): # checks for a valid count entered for num packets.
 		if count == '':
 			return 0
 		for x in count:
@@ -234,12 +234,12 @@ class BaseFrame(Frame):
 
 	
 		
-	def back_btn_pressed(self):
+	def back_btn_pressed(self): # basic functionality of back button
 		root.destroy()
 		import MainMenu
 		
 	def send_btn_pressed(self):
-		Type = self.typechosen.get()
+		Type = self.typechosen.get() # gets the values entered in text boxes into variables.
 		SMac = self.SMacEntry.get()
 		SIP = self.SIPEntry.get()
 		DIP =self.DIPEntry.get()
@@ -249,8 +249,8 @@ class BaseFrame(Frame):
 		TTL = self.TTLEntry.get()
 		NumPacket = self.NoPacketEntry.get()
 		Flag = self.flagchosen.get()
-		if Type not in ["TCP","tcp","UDP","udp","ICMP","icmp"]:
-			messagebox.showerror(title="ERROR!!!", message="The type " + str(Type) + " is not Valid!")
+		if Type not in ["TCP","tcp","UDP","udp","ICMP","icmp"]: # If elif else statement to check validation of each field entered in or left blank.
+			messagebox.showerror(title="ERROR!!!", message="The type " + str(Type) + " is not Valid!") # provides error message box
 		elif self.checkMac(SMac) == 0 and SMac != '':
 			messagebox.showerror(title="ERROR!!!", message="The sender MAC address " + str(SMac) + " is not Valid!")			
 		elif self.checkIP(SIP) == 0 and SIP != '':
@@ -270,12 +270,12 @@ class BaseFrame(Frame):
 		elif self.checkCount(NumPacket) == 0 and NumPacket != '':
 			messagebox.showerror(title="ERROR!!!", message="The number of packets " + str(NumPacket) + " is not Valid!")
 		else:
-			messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!")
+			messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!") # if all good then success text box shown
 			type_insert = Type.upper()
 			if SMac == '':
 				mac_insert = ''
 			else:
-				mac_insert = "Ether(src=\"" + SMac + "\")/"
+				mac_insert = "Ether(src=\"" + SMac + "\")/" # crafting of the payload for scapy to work
 			if SIP == '':
 				source_ip_insert = ''
 			else:
@@ -347,7 +347,7 @@ class BaseFrame(Frame):
 			print(packet)
 
 			if mac_insert != '':
-				send(packet)
+				send(packet) # when the packet is crafted, send the packet using scapy python module.
 				#os.system('python -m scapy')
 				#os.system("send(" + packet + ")")
 			else:
@@ -384,7 +384,7 @@ root.option_add("*TCombobox*Listbox*Font", 'Raleway 17')
 wmgstyle = ttk.Style()
 wmgstyle.theme_create('wmgstyle', parent = 'alt', settings = {'TCombobox': {'configure': {'fieldbackground': '#63CCCA', 'background': '#12263A', 'foreground': '#12263A', 'arrowcolor': "#63CCCA" , 'arrowsize' : '20', 'selectbackground' : '#12263A', 'selectforeground' : "#63CCCA" }}, 'TEntry': {'configure': {'fieldbackground': "#63CCCA" , 'foreground': '#12263A', 'selectbackground' : '#12263A', 'selectforeground' : "#63CCCA" }}, 'TButton': {'configure': {'background': "#63CCCA" , 'foreground': '#12263A', 'selectbackground' : '#12263A', 'selectforeground' : "#63CCCA", 'font': "Raleway 17"}}})
 
-wmgstyle.theme_use("wmgstyle")
+wmgstyle.theme_use("wmgstyle")  # Tkinter settings set for window
 
 lf = BaseFrame(root)
 root.geometry("1024x600")
