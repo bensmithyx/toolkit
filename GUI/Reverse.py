@@ -111,7 +111,7 @@ class BaseFrame(Frame):
     #def run_listener(self,command):
     #    
 
-    def get_ip(self):
+    def get_ip(self): # get the ips of the user machine
         list_ips = []
         valid_ips = 0
         ips = check_output(['hostname', '--all-ip-addresses']).decode("utf-8").split()
@@ -123,7 +123,7 @@ class BaseFrame(Frame):
                 list_ips.append(ip)
         return list_ips
         
-    def OutputCommands(self, ip, port, language): 
+    def OutputCommands(self, ip, port, language): # reading the database and replacing the @ and £ symbols with the ip and port
         file1 = open('reversescripts.txt','r+')
         lines = file1.readlines()
         codeno = 0
@@ -161,7 +161,7 @@ class BaseFrame(Frame):
         
 
 
-    def attack_btn_pressed(self):
+    def attack_btn_pressed(self): # validation after button pressed. If passes validation then os.system is run.
         language = self.languagechosen.get()
         ip = self.ipchosen.get()
         port = self.Portentry.get()
@@ -177,7 +177,7 @@ class BaseFrame(Frame):
                     if int(port) in range(1,65536):
                         messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!")
                         command = self.OutputCommands(ip, port, languageid)
-                        command2 = "xterm -hold -e " +  command
+                        command2 = "xterm -hold -e " +  command # xterm is run and the listener started.
                         os.system(command2)
 
                     else:
