@@ -4,6 +4,7 @@ import tkinter.messagebox as tm
 from PIL import ImageTk, Image
 import os
 
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
 class BaseFrame(Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -64,14 +65,8 @@ class BaseFrame(Frame):
         self.Enumbutton = ttk.Button(self.Enumbuttonbg, text = "Enumerator", width = 17, command = self.enumerator_btn_pressed)
         self.Enumbutton.grid(row = 0, column = 0)
 
-        self.Pullbuttonbg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="0", padx = "10")
-        self.Pullbuttonbg.grid(row = 1, column = 3, sticky = W+E)
-
-        self.Pullbutton = ttk.Button(self.Pullbuttonbg, text = "PullExploits", width = 11, command = self.pull_btn_pressed)
-        self.Pullbutton.grid(row = 0, column = 0)
-
         self.Shellupgradebuttonbg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="0", padx = "10")
-        self.Shellupgradebuttonbg.grid(row = 1, column = 4, sticky = W+E)
+        self.Shellupgradebuttonbg.grid(row = 1, column = 3, sticky = W+E)
 
         self.Shellupgradebutton = ttk.Button(self.Shellupgradebuttonbg, text = "Shellupgrade", width = 11, command = self.shellupgrade_btn_pressed)
         self.Shellupgradebutton.grid(row = 0, column = 0)
@@ -91,6 +86,7 @@ class BaseFrame(Frame):
 
         self.pack()
 
+#deals with the function of buttons
     def nwa_btn_pressed(self):
         root.destroy()
         import NWA
@@ -114,13 +110,11 @@ class BaseFrame(Frame):
     	root.destroy()
     	import Enumerator
 
-    def pull_btn_pressed(self):
-    	root.destroy()
-    	import PullExploits
-
     def shellupgrade_btn_pressed(self):
+        root.destroy()
         import Shellupgrade
-
+        
+#This is the common theme across all menus
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
