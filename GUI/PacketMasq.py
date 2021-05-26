@@ -15,7 +15,8 @@ class TextRedirector(object): #Text redirector redirecting anything from stdout 
 		self.widget.configure(state="normal")
 		self.widget.insert("end", str, (self.tag,))
 		self.widget.configure(state="disabled")
-
+		
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
 class BaseFrame(Frame): # setting up base frame for our tkinter window
 	def __init__(self, master):
 		super().__init__(master)
@@ -355,26 +356,9 @@ class BaseFrame(Frame): # setting up base frame for our tkinter window
 				#os.system("send(" + packet + ")")
 				send(packet)
 			
-		#print(Type)
-		#print(SMac)
-		#print(SIP)
-		#print(DIP)
-		#print(SPort)
-		#print(DPort)
-		#print(PacketID)
-		#print(TTL)
-		#print(NumPacket)
-		#print(Flag)
-		#messagebox.showinfo(title="SUCCESS!!!", message="Exploit is Now Being Conducted!")
-		
-		
-		
-		
-		
-		
+
 	
-	
-	
+#This is the common theme across all menus	
 
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
