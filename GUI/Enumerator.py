@@ -6,6 +6,7 @@ from subprocess import check_output
 import subprocess as sp
 import re, os, threading
 import socket # for sending the scan file to another machine
+import sys
 
 class BaseFrame(Frame):
     def __init__(self, master):
