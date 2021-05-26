@@ -8,6 +8,7 @@ import re
 import sys
 import os,time
 
+#redirects output to standard output
 class TextRedirector(object):
     def __init__(self, widget, tag="stdout"):
         self.widget = widget
@@ -18,6 +19,7 @@ class TextRedirector(object):
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
 
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
 class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
@@ -189,7 +191,7 @@ class BaseFrame(Frame):
     	root.destroy()
     	import MainMenu
     
-
+#This is the common theme across all menus
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
