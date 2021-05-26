@@ -8,31 +8,37 @@ import socket, threading, datetime, time, sys, os, subprocess, math, random, gi
 gi.require_version('Notify', '0.7')
 from gi.repository import Notify
 
+#Here, the GUI code has been implemented to create the template 
 class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
     	
+#creating frames
     	self.header = Frame(self, width = 325, height = 50)
     	self.main = Frame(self, width = 325, height = 550)
     	
+#creating grids
     	self.header.grid(row=0, column=0, sticky=N+E)
     	self.header.grid_propagate(False)
     	self.main.grid(row=1, column=0, sticky=N+E)
     	self.main.grid_propagate(False)
     	
+#creating title
     	self.titlelogo = Canvas(self.header, width = 50, height = 50, highlightthickness = 0)
     	self.titlelogo.grid(row=0, column=0, sticky=W)
     	
+#creating logo for titlepage
     	self.img = Image.open("Logo.png")
     	self.img = self.img.resize((50, 50), Image.ANTIALIAS)
     	self.img1 = ImageTk.PhotoImage(self.img)
     	self.titlelogo.create_image(0.5,1,anchor = N+W, image = self.img1)
     	
+#setting and positioning title
     	self.title = Label(self.header, text="CTF Chatroom", fg="#63CCCA", bg="#12263A", font="Raleway 24 bold", pady="10", padx = "10")
     	self.title.grid(row=0, column=1, sticky=N+W)
     	
+#setting and positioning labels on the menu
     	self.usernametitle = Label(self.main, text="Username:", fg="#63CCCA", bg="#12263A", font="Raleway 14", pady="5", padx = "5")
-    	
     	self.usernametitle.grid(row = 0, column = 0, sticky=S+W)
     	
     	self.usernameentrybg = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, pady="5", padx = "5")
@@ -41,6 +47,7 @@ class BaseFrame(Frame):
     	self.usernameentrybg.grid(row = 1, column = 0, sticky=W)
     	self.connectbuttonbg.grid(row = 1, column = 1, columnspan = 2, sticky=W)
     
+#event - connect if username entered
     	self.v = StringVar()
     	self.usernameentry = ttk.Entry(self.usernameentrybg, textvariable = self.v, font="Raleway 14", width = 18)
     	self.usernameentry.grid(row = 0, column = 0)
@@ -49,6 +56,7 @@ class BaseFrame(Frame):
     	self.connectbutton = ttk.Button(self.connectbuttonbg, text = "Connect", width = 7, command = self.connect_btn_pressed)
     	self.connectbutton.grid(row = 0, column = 0)
 
+#all message outputs
     	self.messageoutput = Text(self.main, bg="#12263A", fg='#63CCCA', width = 34, height = 23, borderwidth = 1, relief = SUNKEN, font="Raleway 10", padx = "10")
     	self.messageoutput.grid(row = 2, column = 0, sticky = "e", columnspan = 2)
     	self.messageoutput.config(state = DISABLED)
@@ -57,7 +65,7 @@ class BaseFrame(Frame):
     	self.messageoutput.tag_config("tag_command", foreground="darkgreen")
     	self.messageoutput.tag_config("tag_your_message", foreground="#F3FFC6")
 
-    	
+#setting up the scroll bar
     	self.outscroll = ttk.Scrollbar(self.main, command=self.messageoutput.yview)
     	self.outscroll.grid(row=2, column=2, sticky='nse')
     	self.messageoutput['yscrollcommand'] = self.outscroll.set
@@ -65,6 +73,7 @@ class BaseFrame(Frame):
     	self.textpadding = Frame(self.main, bg="#12263A", borderwidth = 0, relief = SUNKEN, height = 5)
     	self.textpadding.grid(row = 3, column = 0, columnspan = 3)
     	
+#deals with message input
     	self.messageinput = Text(self.main, bg="#63CCCA", fg='#12263A', pady = "10", width = 36, height = 2, borderwidth = 1, relief = SUNKEN, font="Raleway 10")
     	self.messageinput.grid(row = 4, column = 0, columnspan = 2)
     	self.messageinput.bind("<Return>", (lambda event: self.getChatMessage(self.messageinput.get("1.0", END))))
@@ -74,6 +83,7 @@ class BaseFrame(Frame):
     	self.inscroll.grid(row=4, column=2, sticky='nse')
     	self.messageinput['yscrollcommand'] = self.inscroll.set
 
+#sets background colours of grid
     	self.header.configure(background='#12263A')
     	self.titlelogo.configure(background='#12263A')
     	self.main.configure(background= '#12263A')
@@ -86,6 +96,7 @@ class BaseFrame(Frame):
 
     latency_messages = ["Thirteen", "Thursday", "Princess", "Assonant", "Thousand", "Fourteen", "Language", "Chipotle", "American", "Business", "Favorite", "Elephant", "Children", "Birthday", "Mountain", "Feminine", "Football", "Kindness", "Syllable", "Abdicate", "Treasure", "Virginia", "Envelope", "Strength", "Together", "Memories", "Darkness", "February", "Sandwich", "Calendar", "Bullying", "Equation", "Violence", "Marriage", "Building", "Internal", "Function", "November", "Drooping", "Abortion", "Victoria", "Squirrel", "Tomorrow", "Champion", "self.sound_sentence", "Personal", "Remember", "Daughter", "Hospital", "Ordinary"]
 
+#inputs and options
     username = " "
     userid = 'i'
     passcount = 0
@@ -101,6 +112,7 @@ class BaseFrame(Frame):
     recieved = str(dir_path) + "/Message_Recieved.mp3"
     icon = str(dir_path) + "/icon.png"
     
+#sound functions
     def sound_recieved(self):
     	playsound(self.recieved)
     
@@ -112,6 +124,7 @@ class BaseFrame(Frame):
     HOST_ADDR = "172.67.137.126"
     HOST_PORT = 2521
 
+#validation messages
     def connect_btn_pressed(self):
         if len(self.usernameentry.get()) < 1:
             messagebox.showerror(title="ERROR!!!", message="You MUST enter your first name <e.g. John>")
@@ -119,6 +132,7 @@ class BaseFrame(Frame):
             self.username = self.usernameentry.get()
             self.connect_to_server(self.username)
 
+#decodes the message using binary
     def decode_binary(self, data):
         nums = []
         out = []
@@ -145,7 +159,7 @@ class BaseFrame(Frame):
             if num < 96:
                 out.append(num)
         return out
-
+#encodes the message using binary
     def encode_binary(self, value):
         if value == 0:
             num = "18000000"
@@ -163,7 +177,7 @@ class BaseFrame(Frame):
             return out
         else:
             self.check(out, new+1, x)
-
+#date/time
     def shift(self):
         x = datetime.datetime.now()
         year = x.year
@@ -176,7 +190,7 @@ class BaseFrame(Frame):
             new = intshift % z
             self.check(out, new, self.alphabet[x])
         return out
-
+#encoding using binary
     def encode_data(self, data):
         global setting
         outputlist = []
@@ -186,6 +200,7 @@ class BaseFrame(Frame):
         output = "".join(outputlist)
         return output
 
+#decoding using binary
     def decode_data(self, data):
         global setting
         outputlist = []
@@ -193,7 +208,8 @@ class BaseFrame(Frame):
             outputlist.append(setting[d])
         output = "".join(outputlist)
         return output
-
+        
+#function to send the message
     def send_data(self, data, prefix):
         global client, setting
         client.send(prefix.encode())
@@ -209,7 +225,8 @@ class BaseFrame(Frame):
         multiplier = 10 ** decimals
         rounded = math.floor(n * multiplier) / multiplier
         return rounded
-
+        
+#function to deal with latency, uses array declared above
     def get_latency(self):
         global client
         latency_data = []
@@ -239,7 +256,8 @@ class BaseFrame(Frame):
             if str(server_data) == "f":
                 del latency_data[0:3]
                 break
-        
+                
+#shifting using binary where necessary       
         for x in range(0, 200):
             score = 0
             self.padding = x
@@ -269,13 +287,14 @@ class BaseFrame(Frame):
         else:
             return "NULL"
 
+#function for notifications
     def send_notification(self, username, message):
         Notify.init("Chatroom")
         notification = Notify.Notification.new(self.username, message, self.icon)
         notification.set_urgency(0)
         notification.show()
 
-
+#function to connect to server
     def connect_to_server(self, name):
         global client, setting
         setting = self.shift()
@@ -337,10 +356,12 @@ class BaseFrame(Frame):
             self.connectbutton.config(state=DISABLED)
             self.messageinput.config(state=NORMAL)
 
+#implementing threading
             threading._start_new_thread(self.receive_message_from_server, (client, "m"))
         except Exception as e:
             messagebox.showerror(title="ERROR!!!", message="Cannot connect to host: " + self.HOST_ADDR + " on port: " + str(self.HOST_PORT) + " Server may be Unavailable. Try again later")
 
+#function to recieve messages from server
     def receive_message_from_server(self, sck, m):
         while True:
             try:
@@ -496,10 +517,11 @@ class BaseFrame(Frame):
         client.close()
         self.messageinput.config(state=DISABLED)
 
+#funcrion for threading when new chat occurs
     def getChatMessage(self, msg):
         threading._start_new_thread(self.startChatMessage, (msg, "y"))
 
-
+#function to start a message
     def startChatMessage(self, msg, y):
         msg = msg.replace('\n', '')
         self.messageoutput.see(END)
@@ -799,7 +821,7 @@ class BaseFrame(Frame):
                 if wait == 0:
                     wait = (int(self.userid) + 1)
 
-
+#This is the common theme across all menus
 root = Toplevel()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
