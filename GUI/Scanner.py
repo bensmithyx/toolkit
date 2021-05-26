@@ -18,7 +18,7 @@ class Scan:
         self.host = host
         self.time = time
 
-
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
 class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
@@ -101,6 +101,7 @@ class BaseFrame(Frame):
     scans = []
     dirbslist = []
 
+#this checks if the IP entered is a valid IP address
     def checkIP(self, ip):
         if ip == "localhost":
             return ip
@@ -148,7 +149,7 @@ class BaseFrame(Frame):
         else:
             display("Invalid range set")
             return 0
-        # Creating arrays for ips of the ports, status of the ports and servivce of the ports to be populated with
+        # Creating arrays for ips of the ports, status of the ports and service of the ports to be populated with
         ports, statuses, services = [],[],[]
         try:
             print("Scanning (" + ip + ")")
@@ -286,7 +287,7 @@ class TextRedirector(object):
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
 
-
+#This is the common theme across all menus
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
