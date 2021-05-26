@@ -11,6 +11,7 @@ class BaseFrame(Frame):
     def __init__(self, master):
     	super().__init__(master)
     	
+#this is the GUI code - creating the template. This is common across all, with the exception of labels/buttons in different areas.
     	self.header = Frame(self, width = 1024, height = 100)
     	self.main = Frame(self, width = 1024, height = 450)
     	self.footer = Frame(self, width = 1024, height = 50)
@@ -95,6 +96,7 @@ class BaseFrame(Frame):
     	self.optionschosen.menu = Menu(self.optionschosen, tearoff=0)
     	self.optionschosen["menu"] = self.optionschosen.menu
 
+#collecting all the options that can be selected in the GUI
     	self.option0 = IntVar()
     	self.option1 = IntVar()
     	self.option2 = IntVar()
@@ -665,7 +667,7 @@ class TextRedirector(object):
         self.widget.insert("end", str, (self.tag,))
         self.widget.configure(state="disabled")
     
-
+#This is the common theme across all menus
 root = Tk()
 root.option_add("*TCombobox*Listbox*Background", '#12263A')
 root.option_add("*TCombobox*Listbox*Foreground", '#63CCCA')
