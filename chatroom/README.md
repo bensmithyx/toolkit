@@ -1,1 +1,1 @@
-
+This is a chatroom that sit alongside the toolbox as a form of communication for clients. It allows a user to connect, send and recieve messages, as well as allowing admin priveldges to certain clients.
