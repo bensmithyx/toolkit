@@ -132,7 +132,7 @@ class BaseFrame(Frame):
             self.username = self.usernameentry.get()
             self.connect_to_server(self.username)
 
-#decodes the message using binary
+#Decodes the binary message.  Each binary number is a 9 bit negative binary number, in which the modulus of that number is the index of the character in the shifted alphabet.  It then returns the index of the character of that binary number. 
     def decode_binary(self, data):
         nums = []
         out = []
@@ -159,7 +159,8 @@ class BaseFrame(Frame):
             if num < 96:
                 out.append(num)
         return out
-#encodes the message using binary
+    
+#Encodes the message using a negative 9 bit binary number.  It takes the negative of the index of the character and converts it to the 9 bit binary number in 2s complement.  It returns the binary number for that character. 
     def encode_binary(self, value):
         if value == 0:
             num = "18000000"
@@ -171,13 +172,15 @@ class BaseFrame(Frame):
             num = "11%s" % num
         return num
 
+#Checks if the character is already seated in the alphabet.
     def check(self, out, new, x):
         if out[new] == '':
             out[new] = x
             return out
         else:
             self.check(out, new+1, x)
-#date/time
+            
+#Shifts the alphabet based on the current date.  It uses a mathematical shift to re arrange the alphabet of characters.
     def shift(self):
         x = datetime.datetime.now()
         year = x.year
@@ -190,7 +193,8 @@ class BaseFrame(Frame):
             new = intshift % z
             self.check(out, new, self.alphabet[x])
         return out
-#encoding using binary
+    
+#Converts a character to its index in the shifted alphabet.
     def encode_data(self, data):
         global setting
         outputlist = []
@@ -199,8 +203,8 @@ class BaseFrame(Frame):
             outputlist.append(setting[newloc])
         output = "".join(outputlist)
         return output
-
-#decoding using binary
+    
+#Converts an index to its character in the shifted alphabet.
     def decode_data(self, data):
         global setting
         outputlist = []
@@ -209,7 +213,7 @@ class BaseFrame(Frame):
         output = "".join(outputlist)
         return output
         
-#function to send the message
+#Sends tcp packets with a specified type of message.
     def send_data(self, data, prefix):
         global client, setting
         client.send(prefix.encode())
@@ -226,7 +230,7 @@ class BaseFrame(Frame):
         rounded = math.floor(n * multiplier) / multiplier
         return rounded
         
-#function to deal with latency, uses array declared above
+#Initiates a handshake in which three 8 letter words are sent to the server.  The messages are then sent back from the server to the client.  It then checks all avaliable settings to find the optimum setting for accuracy.
     def get_latency(self):
         global client
         latency_data = []
@@ -257,7 +261,7 @@ class BaseFrame(Frame):
                 del latency_data[0:3]
                 break
                 
-#shifting using binary where necessary       
+#Converts the three 8 letter words to 9 bit twos compliment binary and sends them to the server.
         for x in range(0, 200):
             score = 0
             self.padding = x
