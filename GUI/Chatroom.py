@@ -291,14 +291,14 @@ class BaseFrame(Frame):
         else:
             return "NULL"
 
-#function for notifications
+#Sends the user notifications when they recieve a message.
     def send_notification(self, username, message):
         Notify.init("Chatroom")
         notification = Notify.Notification.new(self.username, message, self.icon)
         notification.set_urgency(0)
         notification.show()
 
-#function to connect to server
+#Initates the connection with the sever.  It recieves the user index, and then recieves all other users currently connected to the chatroom.  It then calls the latency function to get the correct latency setting.  It then displays the welcome message.
     def connect_to_server(self, name):
         global client, setting
         setting = self.shift()
@@ -360,12 +360,12 @@ class BaseFrame(Frame):
             self.connectbutton.config(state=DISABLED)
             self.messageinput.config(state=NORMAL)
 
-#implementing threading
+#Implementing threading to recieve a messages from the server.  Allows the code to carry on, whilst still listening for messages.
             threading._start_new_thread(self.receive_message_from_server, (client, "m"))
         except Exception as e:
             messagebox.showerror(title="ERROR!!!", message="Cannot connect to host: " + self.HOST_ADDR + " on port: " + str(self.HOST_PORT) + " Server may be Unavailable. Try again later")
 
-#function to recieve messages from server
+#Recieves messages from server.  Then determines the type of message that it is.  If it is a username join datatype, it will add the username to the correct index, and show that a user has joined.  If it is a username leave datatype, it will remove the username from its index, and show that a user has left.  If it is a username kicked datatype, it will remove the username from its index, and show that a user has been kicked.  If it is a message datatype, it will show the message from that user.
     def receive_message_from_server(self, sck, m):
         while True:
             try:
@@ -521,11 +521,11 @@ class BaseFrame(Frame):
         client.close()
         self.messageinput.config(state=DISABLED)
 
-#funcrion for threading when new chat occurs
+#Threading when new chat occurs.
     def getChatMessage(self, msg):
         threading._start_new_thread(self.startChatMessage, (msg, "y"))
 
-#function to start a message
+#Checks all messages to be sent to the server.  If a command is entered then it is treated as such, and only the correct procedure is followed to send it to the server.  If '/help' is typed, it will show the help menu.  If '/admin {password}' is typed, it will login the user as an administrator.  If '/kick {username}', it will send a message to the server to kick the user.  If '/mute {username}', it will mute the user on the client.  If '/unmute {username}', it will unmute the user on the client.  If '/reload', it will reload all stored usernames.  If '/exit', it will close the client.
     def startChatMessage(self, msg, y):
         msg = msg.replace('\n', '')
         self.messageoutput.see(END)
@@ -811,6 +811,7 @@ class BaseFrame(Frame):
                 threading._start_new_thread(self.send_mssage_to_server, (msg, "y"))
                 self.sound_sent()
 
+#Actually sends the a message to the server.
     def send_mssage_to_server(self, msg, y):
         wait = 0
         while True:
